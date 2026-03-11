@@ -1,0 +1,133 @@
+<!-- 
+Budget Counter Display Tests
+These tests verify the budget counter element meets acceptance criteria
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Budget Counter Tests</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Budget Counter Display Tests</h1>
+    <div id="test-results"></div>
+
+    <script>
+        async function runTests() {
+            const results = [];
+            
+            try {
+                // Fetch the index.html file
+                const response = await fetch('./index.html');
+                const htmlContent = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+
+                // Test 1: Verify budget counter element exists
+                const budgetCounter = doc.querySelector('[data-budget-counter]');
+                results.push({
+                    name: 'Budget counter element exists',
+                    pass: !!budgetCounter,
+                });
+
+                // Test 2: Verify budget counter displays value 1,000,000
+                if (budgetCounter) {
+                    const text = budgetCounter.textContent.trim();
+                    const hasValue = text.includes('1000000') || text.includes('1,000,000');
+                    results.push({
+                        name: 'Budget displays value 1,000,000',
+                        pass: hasValue,
+                    });
+
+                    // Test 3: Verify budget has clear label "Budget"
+                    const hasLabel = text.toLowerCase().includes('budget');
+                    results.push({
+                        name: 'Budget has clear "Budget" label',
+                        pass: hasLabel,
+                    });
+
+                    // Test 4: Verify budget has currency formatting ($ or currency symbol)
+                    const hasCurrency = /[$]|[$]/.test(text);
+                    results.push({
+                        name: 'Budget value has currency formatting ($)',
+                        pass: hasCurrency,
+                    });
+
+                    // Test 5: Verify budget has comma formatting for thousands
+                    const hasCommaFormatting = text.includes('1,000,000') || text.includes('$1,000,000');
+                    results.push({
+                        name: 'Budget value is formatted with commas',
+                        pass: hasCommaFormatting,
+                    });
+
+                    // Test 6: Verify complete formatted string matches pattern
+                    const expectedPattern = /budget.*\$?1,000,000|\$1,000,000/i;
+                    const matchesPattern = expectedPattern.test(text.replace(/\s+/g, ' '));
+                    results.push({
+                        name: 'Budget displays complete formatted value (e.g., "Budget: $1,000,000")',
+                        pass: matchesPattern,
+                    });
+                } else {
+                    // If budget counter doesn't exist, all tests fail
+                    results.push({
+                        name: 'Budget displays value 1,000,000',
+                        pass: false,
+                    });
+                    results.push({
+                        name: 'Budget has clear "Budget" label',
+                        pass: false,
+                    });
+                    results.push({
+                        name: 'Budget value has currency formatting ($)',
+                        pass: false,
+                    });
+                    results.push({
+                        name: 'Budget value is formatted with commas',
+                        pass: false,
+                    });
+                    results.push({
+                        name: 'Budget displays complete formatted value (e.g., "Budget: $1,000,000")',
+                        pass: false,
+                    });
+                }
+
+                // Render results
+                const resultsDiv = document.getElementById('test-results');
+                let passCount = 0;
+                let failCount = 0;
+
+                results.forEach(test => {
+                    const testDiv = document.createElement('div');
+                    testDiv.className = `test ${test.pass ? 'pass' : 'fail'}`;
+                    testDiv.textContent = `${test.pass ? '✓' : '✗'} ${test.name}`;
+                    resultsDiv.appendChild(testDiv);
+
+                    if (test.pass) passCount++;
+                    else failCount++;
+                });
+
+                // Summary
+                const summary = document.createElement('div');
+                summary.style.marginTop = '20px';
+                summary.style.fontSize = '16px';
+                summary.style.fontWeight = 'bold';
+                summary.textContent = `Results: ${passCount} passed, ${failCount} failed`;
+                resultsDiv.appendChild(summary);
+
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = 
+                    `<div class="test fail">Error running tests: ${error.message}</div>`;
+            }
+        }
+
+        // Run tests when page loads
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>
