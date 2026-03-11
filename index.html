@@ -26,6 +26,38 @@
             border-left: 4px solid #4CAF50;
             margin-bottom: 20px;
         }
+
+        .mission-list-container {
+            margin-top: 30px;
+            background: #f9f9f9;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            min-height: 300px;
+        }
+
+        .mission-list-container h2 {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .mission-list {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .mission-list.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 250px;
+            color: #666;
+            font-size: 1.1rem;
+        }
     </style>
 </head>
 <body>
@@ -34,6 +66,13 @@
         <div data-budget-counter class="budget-counter">
             Budget: $1,000,000
         </div>
+
+        <section class="mission-list-container">
+            <h2>Available Missions</h2>
+            <ul class="mission-list empty" id="missionList">
+                <li>No missions available yet. Check back soon!</li>
+            </ul>
+        </section>
     </main>
 </body>
 </html>

@@ -1,135 +1,112 @@
 <!--
-Budget Counter Display Tests
-These tests verify the budget counter element meets acceptance criteria
+Mission List Container Tests
+These tests verify the mission list container meets acceptance criteria
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Budget Counter Tests</title>
+    <title>Mission List Container Tests</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
-        .pass { background-color: #d4edda; color: #155724; }
-        .fail { background-color: #f8d7da; color: #721c24; }
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        .test-case { padding: 10px; margin: 10px 0; border-left: 4px solid #ddd; }
+        .test-case.pass { background: #d4edda; border-left-color: #28a745; }
+        .test-case.fail { background: #f8d7da; border-left-color: #dc3545; }
+        .summary { padding: 15px; margin-top: 20px; background: #e7f3ff; border: 2px solid #0066cc; border-radius: 4px; }
+        .summary.all-pass { background: #d4edda; border-color: #28a745; }
     </style>
 </head>
 <body>
-    <h1>Budget Counter Display Tests</h1>
-    <div id="test-results"></div>
+    <h1>Mission List Container - Test Results</h1>
+    <div id="testResults"></div>
 
     <script>
-        async function runTests() {
-            const results = [];
+        const tests = [];
 
-            try {
-                // Fetch the index.html file
-                const response = await fetch('./index.html');
-                const htmlContent = await response.text();
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(htmlContent, 'text/html');
+        function test(description, fn) {
+            tests.push({ description, fn });
+        }
 
-                // Test 1: Verify budget counter element exists
-                const budgetCounter = doc.querySelector('[data-budget-counter]');
-                results.push({
-                    name: 'Budget counter element exists',
-                    pass: !!budgetCounter,
-                });
+        function renderResults() {
+            const results = document.getElementById('testResults');
+            let passCount = 0;
+            let failCount = 0;
 
-                // Test 2: Verify budget counter displays value 1,000,000
-                if (budgetCounter) {
-                    const text = budgetCounter.textContent.trim();
-                    const hasValue = text.includes('1000000') || text.includes('1,000,000');
-                    results.push({
-                        name: 'Budget displays value 1,000,000',
-                        pass: hasValue,
-                    });
-
-                    // Test 3: Verify budget has clear label "Budget"
-                    const hasLabel = text.toLowerCase().includes('budget');
-                    results.push({
-                        name: 'Budget has clear "Budget" label',
-                        pass: hasLabel,
-                    });
-
-                    // Test 4: Verify budget has currency formatting ($ or currency symbol)
-                    const hasCurrency = /[$]/.test(text);
-                    results.push({
-                        name: 'Budget value has currency formatting ($)',
-                        pass: hasCurrency,
-                    });
-
-                    // Test 5: Verify budget has comma formatting for thousands
-                    const hasCommaFormatting = text.includes('1,000,000') || text.includes('$1,000,000');
-                    results.push({
-                        name: 'Budget value is formatted with commas',
-                        pass: hasCommaFormatting,
-                    });
-
-                    // Test 6: Verify complete formatted string matches pattern
-                    const expectedPattern = /budget.*\$?1,000,000|\$1,000,000/i;
-                    const matchesPattern = expectedPattern.test(text.replace(/\s+/g, ' '));
-                    results.push({
-                        name: 'Budget displays complete formatted value (e.g., "Budget: $1,000,000")',
-                        pass: matchesPattern,
-                    });
-                } else {
-                    // If budget counter doesn't exist, all tests fail
-                    results.push({
-                        name: 'Budget displays value 1,000,000',
-                        pass: false,
-                    });
-                    results.push({
-                        name: 'Budget has clear "Budget" label',
-                        pass: false,
-                    });
-                    results.push({
-                        name: 'Budget value has currency formatting ($)',
-                        pass: false,
-                    });
-                    results.push({
-                        name: 'Budget value is formatted with commas',
-                        pass: false,
-                    });
-                    results.push({
-                        name: 'Budget displays complete formatted value (e.g., "Budget: $1,000,000")',
-                        pass: false,
-                    });
+            tests.forEach(({ description, fn }) => {
+                const div = document.createElement('div');
+                try {
+                    fn();
+                    div.className = 'test-case pass';
+                    div.textContent = '\u2713 ' + description;
+                    passCount++;
+                } catch (error) {
+                    div.className = 'test-case fail';
+                    div.textContent = '\u2717 ' + description + ' - ' + error.message;
+                    failCount++;
                 }
+                results.appendChild(div);
+            });
 
-                // Render results
-                const resultsDiv = document.getElementById('test-results');
-                let passCount = 0;
-                let failCount = 0;
+            const summary = document.createElement('div');
+            summary.className = 'summary' + (failCount === 0 ? ' all-pass' : '');
+            summary.textContent = 'Test Summary: ' + passCount + ' passed, ' + failCount + ' failed out of ' + tests.length + ' tests';
+            results.appendChild(summary);
+        }
 
-                results.forEach(test => {
-                    const testDiv = document.createElement('div');
-                    testDiv.className = `test ${test.pass ? 'pass' : 'fail'}`;
-                    testDiv.textContent = `${test.pass ? '✓' : '✗'} ${test.name}`;
-                    resultsDiv.appendChild(testDiv);
+        async function loadAndTest() {
+            try {
+                const response = await fetch('index.html');
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
 
-                    if (test.pass) passCount++;
-                    else failCount++;
+                test('Mission list container exists in HTML', () => {
+                    const container = doc.querySelector('.mission-list-container');
+                    if (!container) throw new Error('Container with class "mission-list-container" not found');
                 });
 
-                // Summary
-                const summary = document.createElement('div');
-                summary.style.marginTop = '20px';
-                summary.style.fontSize = '16px';
-                summary.style.fontWeight = 'bold';
-                summary.textContent = `Results: ${passCount} passed, ${failCount} failed`;
-                resultsDiv.appendChild(summary);
+                test('Container is a section element', () => {
+                    const container = doc.querySelector('section.mission-list-container');
+                    if (!container) throw new Error('Container should be a <section> element');
+                });
 
+                test('Container has styling (background, border, padding)', () => {
+                    if (!html.includes('.mission-list-container')) {
+                        throw new Error('No styles found for .mission-list-container');
+                    }
+                });
+
+                test('Mission list (ul) exists inside container', () => {
+                    const container = doc.querySelector('.mission-list-container');
+                    const list = container ? container.querySelector('.mission-list') : null;
+                    if (!list || list.tagName !== 'UL') throw new Error('ul.mission-list should exist inside container');
+                });
+
+                test('Mission list has ID attribute for scripting', () => {
+                    const list = doc.querySelector('.mission-list');
+                    if (!list || !list.id) throw new Error('Mission list should have an id attribute');
+                });
+
+                test('Container has minimum height', () => {
+                    if (!html.includes('min-height')) throw new Error('Container should have min-height property');
+                });
+
+                test('Container has a heading for clarity', () => {
+                    const container = doc.querySelector('.mission-list-container');
+                    const heading = container ? container.querySelector('h2') : null;
+                    if (!heading) throw new Error('Container should have an h2 heading');
+                });
+
+                renderResults();
             } catch (error) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'test fail';
-                errorDiv.textContent = 'Error running tests: ' + error.message;
-                document.getElementById('test-results').appendChild(errorDiv);
+                const div = document.createElement('div');
+                div.className = 'test-case fail';
+                div.textContent = 'Error loading tests: ' + error.message;
+                document.getElementById('testResults').appendChild(div);
             }
         }
 
-        // Run tests when page loads
-        window.addEventListener('load', runTests);
+        document.addEventListener('DOMContentLoaded', loadAndTest);
     </script>
 </body>
 </html>
