@@ -3,51 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Agency Game</title>
+    <title>Stellar Command Academy</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #eee;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 0;
             padding: 20px;
         }
 
-        .container {
+        .dashboard {
             max-width: 1200px;
             margin: 0 auto;
         }
 
-        header {
-            text-align: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #0f3460;
+        .budget-counter {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+            margin-bottom: 20px;
         }
 
-        h1 {
-            font-size: 2.5rem;
-            color: #00d4ff;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
-            margin-bottom: 10px;
-        }
-
-        p {
-            color: #aaa;
-            font-size: 1.1rem;
-        }
-
-        /* Mission List Container Styles */
         .mission-list-container {
             margin-top: 30px;
-            background: rgba(15, 52, 96, 0.4);
-            border: 2px solid #0f3460;
+            background: #f9f9f9;
+            border: 2px solid #ddd;
             border-radius: 8px;
             padding: 20px;
             min-height: 300px;
@@ -55,14 +38,13 @@
 
         .mission-list-container h2 {
             font-size: 1.5rem;
-            color: #00d4ff;
+            color: #333;
             margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .mission-list {
             list-style: none;
+            padding: 0;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -79,20 +61,18 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🚀 Space Agency Game</h1>
-            <p>Complete missions to advance your space exploration career</p>
-        </header>
+    <main id="dashboard-container" class="dashboard">
+        <!-- Main dashboard content will go here -->
+        <div data-budget-counter class="budget-counter">
+            Budget: $1,000,000
+        </div>
 
-        <main>
-            <section class="mission-list-container">
-                <h2>Available Missions</h2>
-                <ul class="mission-list empty" id="missionList">
-                    <li>No missions available yet. Check back soon!</li>
-                </ul>
-            </section>
-        </main>
-    </div>
+        <section class="mission-list-container">
+            <h2>Available Missions</h2>
+            <ul class="mission-list empty" id="missionList">
+                <li>No missions available yet. Check back soon!</li>
+            </ul>
+        </section>
+    </main>
 </body>
 </html>

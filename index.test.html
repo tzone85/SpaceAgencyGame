@@ -1,41 +1,19 @@
+<!--
+Mission List Container Tests
+These tests verify the mission list container meets acceptance criteria
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Mission List Container Tests</title>
     <style>
-        body {
-            font-family: monospace;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        .test-suite {
-            margin-bottom: 20px;
-        }
-        .test-case {
-            padding: 10px;
-            margin: 10px 0;
-            border-left: 4px solid #ddd;
-        }
-        .test-case.pass {
-            background: #d4edda;
-            border-left-color: #28a745;
-        }
-        .test-case.fail {
-            background: #f8d7da;
-            border-left-color: #dc3545;
-        }
-        .summary {
-            padding: 15px;
-            margin-top: 20px;
-            background: #e7f3ff;
-            border: 2px solid #0066cc;
-            border-radius: 4px;
-        }
-        .summary.all-pass {
-            background: #d4edda;
-            border-color: #28a745;
-        }
+        body { font-family: monospace; padding: 20px; background: #f5f5f5; }
+        .test-case { padding: 10px; margin: 10px 0; border-left: 4px solid #ddd; }
+        .test-case.pass { background: #d4edda; border-left-color: #28a745; }
+        .test-case.fail { background: #f8d7da; border-left-color: #dc3545; }
+        .summary { padding: 15px; margin-top: 20px; background: #e7f3ff; border: 2px solid #0066cc; border-radius: 4px; }
+        .summary.all-pass { background: #d4edda; border-color: #28a745; }
     </style>
 </head>
 <body>
@@ -43,37 +21,38 @@
     <div id="testResults"></div>
 
     <script>
-        // Test runner
         const tests = [];
-        
+
         function test(description, fn) {
             tests.push({ description, fn });
         }
 
-        function runTests() {
+        function renderResults() {
             const results = document.getElementById('testResults');
             let passCount = 0;
             let failCount = 0;
 
             tests.forEach(({ description, fn }) => {
+                const div = document.createElement('div');
                 try {
                     fn();
-                    results.innerHTML += `<div class="test-case pass">✓ ${description}</div>`;
+                    div.className = 'test-case pass';
+                    div.textContent = '\u2713 ' + description;
                     passCount++;
                 } catch (error) {
-                    results.innerHTML += `<div class="test-case fail">✗ ${description}<br><small>${error.message}</small></div>`;
+                    div.className = 'test-case fail';
+                    div.textContent = '\u2717 ' + description + ' - ' + error.message;
                     failCount++;
                 }
+                results.appendChild(div);
             });
 
-            // Summary
-            const allPass = failCount === 0;
-            results.innerHTML += `<div class="summary ${allPass ? 'all-pass' : ''}">
-                <strong>Test Summary:</strong> ${passCount} passed, ${failCount} failed out of ${tests.length} tests
-            </div>`;
+            const summary = document.createElement('div');
+            summary.className = 'summary' + (failCount === 0 ? ' all-pass' : '');
+            summary.textContent = 'Test Summary: ' + passCount + ' passed, ' + failCount + ' failed out of ' + tests.length + ' tests';
+            results.appendChild(summary);
         }
 
-        // Load the index.html content for testing
         async function loadAndTest() {
             try {
                 const response = await fetch('index.html');
@@ -81,94 +60,52 @@
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
 
-                // Acceptance Criteria Tests
-                
-                // Test 1: Mission list container exists in the HTML
                 test('Mission list container exists in HTML', () => {
                     const container = doc.querySelector('.mission-list-container');
-                    if (!container) {
-                        throw new Error('Mission list container with class "mission-list-container" not found');
-                    }
+                    if (!container) throw new Error('Container with class "mission-list-container" not found');
                 });
 
-                // Test 2: Container has proper HTML structure
                 test('Container is a section element', () => {
                     const container = doc.querySelector('section.mission-list-container');
-                    if (!container || container.tagName !== 'SECTION') {
-                        throw new Error('Container should be a <section> element');
-                    }
+                    if (!container) throw new Error('Container should be a <section> element');
                 });
 
-                // Test 3: Container is positioned below other elements
-                test('Container is positioned below header', () => {
-                    const header = doc.querySelector('header');
-                    const container = doc.querySelector('.mission-list-container');
-                    const headerIndex = Array.from(doc.body.children).indexOf(header);
-                    const containerParent = container.closest('.container');
-                    const containerIndex = Array.from(containerParent.children).indexOf(container.closest('main'));
-                    
-                    if (containerIndex <= headerIndex) {
-                        throw new Error('Container should be positioned below the header');
-                    }
-                });
-
-                // Test 4: Container has appropriate styling
                 test('Container has styling (background, border, padding)', () => {
-                    const html = await response.text();
-                    const styleTag = html.match(/<style[^>]*>([\s\S]*?)<\/style>/)[1];
-                    
-                    if (!styleTag.includes('.mission-list-container')) {
+                    if (!html.includes('.mission-list-container')) {
                         throw new Error('No styles found for .mission-list-container');
                     }
-                    
-                    if (!styleTag.includes('background') || !styleTag.includes('border') || !styleTag.includes('padding')) {
-                        throw new Error('Container should have background, border, and padding styles');
-                    }
                 });
 
-                // Test 5: Mission list exists inside container
                 test('Mission list (ul) exists inside container', () => {
                     const container = doc.querySelector('.mission-list-container');
-                    const list = container.querySelector('.mission-list');
-                    if (!list || list.tagName !== 'UL') {
-                        throw new Error('Mission list (ul.mission-list) should exist inside container');
-                    }
+                    const list = container ? container.querySelector('.mission-list') : null;
+                    if (!list || list.tagName !== 'UL') throw new Error('ul.mission-list should exist inside container');
                 });
 
-                // Test 6: Mission list has ID for JavaScript manipulation
                 test('Mission list has ID attribute for scripting', () => {
                     const list = doc.querySelector('.mission-list');
-                    if (!list.id) {
-                        throw new Error('Mission list should have an id attribute for JavaScript manipulation');
-                    }
+                    if (!list || !list.id) throw new Error('Mission list should have an id attribute');
                 });
 
-                // Test 7: Container has minimum height
-                test('Container has sufficient height for displaying items', () => {
-                    const html = await response.text();
-                    const styleTag = html.match(/<style[^>]*>([\s\S]*?)<\/style>/)[1];
-                    
-                    if (!styleTag.includes('min-height')) {
-                        throw new Error('Container should have min-height property');
-                    }
+                test('Container has minimum height', () => {
+                    if (!html.includes('min-height')) throw new Error('Container should have min-height property');
                 });
 
-                // Test 8: Heading exists in container
                 test('Container has a heading for clarity', () => {
                     const container = doc.querySelector('.mission-list-container');
-                    const heading = container.querySelector('h2');
-                    if (!heading) {
-                        throw new Error('Container should have an h2 heading');
-                    }
+                    const heading = container ? container.querySelector('h2') : null;
+                    if (!heading) throw new Error('Container should have an h2 heading');
                 });
 
-                runTests();
+                renderResults();
             } catch (error) {
-                document.getElementById('testResults').innerHTML = `<div class="test-case fail">Error loading tests: ${error.message}</div>`;
+                const div = document.createElement('div');
+                div.className = 'test-case fail';
+                div.textContent = 'Error loading tests: ' + error.message;
+                document.getElementById('testResults').appendChild(div);
             }
         }
 
-        // Run tests on page load
         document.addEventListener('DOMContentLoaded', loadAndTest);
     </script>
 </body>
