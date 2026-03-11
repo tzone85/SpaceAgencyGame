@@ -58,6 +58,60 @@
             color: #666;
             font-size: 1.1rem;
         }
+
+        .mission-entry {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .mission-entry:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .mission-entry-content {
+            flex: 1;
+        }
+
+        .mission-entry-planet {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .mission-entry-cost {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .launch-mission-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+
+        .launch-mission-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .launch-mission-btn:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 <body>
@@ -69,10 +123,74 @@
 
         <section class="mission-list-container">
             <h2>Available Missions</h2>
+            <button id="launchMissionBtn" class="launch-mission-btn">Launch Mission</button>
             <ul class="mission-list empty" id="missionList">
                 <li>No missions available yet. Check back soon!</li>
             </ul>
         </section>
     </main>
+
+    <script>
+        // Sample mission data
+        const missions = [
+            { planet: 'Mars', cost: 50000 },
+            { planet: 'Venus', cost: 75000 },
+            { planet: 'Jupiter', cost: 150000 },
+            { planet: 'Saturn', cost: 200000 },
+            { planet: 'Neptune', cost: 250000 }
+        ];
+
+        let missionIndex = 0;
+
+        // Function to create a mission entry
+        function createMissionEntry(planet, cost) {
+            const li = document.createElement('li');
+            li.className = 'mission-entry';
+
+            const content = document.createElement('div');
+            content.className = 'mission-entry-content';
+
+            const planetName = document.createElement('div');
+            planetName.className = 'mission-entry-planet';
+            planetName.textContent = planet;
+
+            const costDisplay = document.createElement('div');
+            costDisplay.className = 'mission-entry-cost';
+            costDisplay.textContent = 'Cost: $' + cost.toLocaleString();
+
+            content.appendChild(planetName);
+            content.appendChild(costDisplay);
+            li.appendChild(content);
+
+            return li;
+        }
+
+        // Function to add a mission to the list
+        function addMission() {
+            const missionList = document.getElementById('missionList');
+
+            // Get the next mission (cycle through available missions)
+            const mission = missions[missionIndex % missions.length];
+            missionIndex++;
+
+            // Remove empty message on first mission
+            if (missionList.classList.contains('empty')) {
+                missionList.innerHTML = '';
+                missionList.classList.remove('empty');
+            }
+
+            // Create and append the mission entry
+            const missionEntry = createMissionEntry(mission.planet, mission.cost);
+            missionList.appendChild(missionEntry);
+        }
+
+        // Set up event listener for the Launch Mission button
+        document.addEventListener('DOMContentLoaded', function() {
+            const launchBtn = document.getElementById('launchMissionBtn');
+            if (launchBtn) {
+                launchBtn.addEventListener('click', addMission);
+            }
+        });
+    </script>
 </body>
 </html>
