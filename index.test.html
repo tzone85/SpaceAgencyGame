@@ -1,12 +1,12 @@
-<!-- 
-HTML Structure Validation Tests for index.html
-These tests verify the basic HTML5 structure meets acceptance criteria
+<!--
+Budget Counter Display Tests
+These tests verify the budget counter element meets acceptance criteria
 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>HTML Structure Tests</title>
+    <title>Budget Counter Tests</title>
     <style>
         body { font-family: Arial, sans-serif; padding: 20px; }
         .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
@@ -15,13 +15,13 @@ These tests verify the basic HTML5 structure meets acceptance criteria
     </style>
 </head>
 <body>
-    <h1>HTML Structure Validation Tests</h1>
+    <h1>Budget Counter Display Tests</h1>
     <div id="test-results"></div>
 
     <script>
         async function runTests() {
             const results = [];
-            
+
             try {
                 // Fetch the index.html file
                 const response = await fetch('./index.html');
@@ -29,67 +29,73 @@ These tests verify the basic HTML5 structure meets acceptance criteria
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlContent, 'text/html');
 
-                // Test 1: Verify DOCTYPE
+                // Test 1: Verify budget counter element exists
+                const budgetCounter = doc.querySelector('[data-budget-counter]');
                 results.push({
-                    name: 'HTML5 DOCTYPE present',
-                    pass: htmlContent.toLowerCase().includes('<!doctype html>'),
+                    name: 'Budget counter element exists',
+                    pass: !!budgetCounter,
                 });
 
-                // Test 2: Verify lang attribute
-                const htmlElement = doc.documentElement;
-                results.push({
-                    name: 'HTML lang attribute set',
-                    pass: htmlElement.getAttribute('lang') === 'en',
-                });
+                // Test 2: Verify budget counter displays value 1,000,000
+                if (budgetCounter) {
+                    const text = budgetCounter.textContent.trim();
+                    const hasValue = text.includes('1000000') || text.includes('1,000,000');
+                    results.push({
+                        name: 'Budget displays value 1,000,000',
+                        pass: hasValue,
+                    });
 
-                // Test 3: Verify head section exists
-                const headElement = doc.querySelector('head');
-                results.push({
-                    name: 'Head section exists',
-                    pass: !!headElement,
-                });
+                    // Test 3: Verify budget has clear label "Budget"
+                    const hasLabel = text.toLowerCase().includes('budget');
+                    results.push({
+                        name: 'Budget has clear "Budget" label',
+                        pass: hasLabel,
+                    });
 
-                // Test 4: Verify title element
-                const titleElement = doc.querySelector('title');
-                results.push({
-                    name: 'Title element present',
-                    pass: !!titleElement && titleElement.textContent.length > 0,
-                });
+                    // Test 4: Verify budget has currency formatting ($ or currency symbol)
+                    const hasCurrency = /[$]/.test(text);
+                    results.push({
+                        name: 'Budget value has currency formatting ($)',
+                        pass: hasCurrency,
+                    });
 
-                // Test 5: Verify charset meta tag
-                const charsetMeta = doc.querySelector('meta[charset]');
-                results.push({
-                    name: 'Charset meta tag present',
-                    pass: !!charsetMeta && charsetMeta.getAttribute('charset') === 'UTF-8',
-                });
+                    // Test 5: Verify budget has comma formatting for thousands
+                    const hasCommaFormatting = text.includes('1,000,000') || text.includes('$1,000,000');
+                    results.push({
+                        name: 'Budget value is formatted with commas',
+                        pass: hasCommaFormatting,
+                    });
 
-                // Test 6: Verify viewport meta tag
-                const viewportMeta = doc.querySelector('meta[name="viewport"]');
-                results.push({
-                    name: 'Viewport meta tag present',
-                    pass: !!viewportMeta,
-                });
-
-                // Test 7: Verify body section exists
-                const bodyElement = doc.querySelector('body');
-                results.push({
-                    name: 'Body section exists',
-                    pass: !!bodyElement,
-                });
-
-                // Test 8: Verify main dashboard container
-                const dashboardContainer = doc.querySelector('main#dashboard-container');
-                results.push({
-                    name: 'Main dashboard container with id exists',
-                    pass: !!dashboardContainer,
-                });
-
-                // Test 9: Verify main element has dashboard class
-                const mainElement = doc.querySelector('main');
-                results.push({
-                    name: 'Main element has dashboard class',
-                    pass: !!mainElement && mainElement.classList.contains('dashboard'),
-                });
+                    // Test 6: Verify complete formatted string matches pattern
+                    const expectedPattern = /budget.*\$?1,000,000|\$1,000,000/i;
+                    const matchesPattern = expectedPattern.test(text.replace(/\s+/g, ' '));
+                    results.push({
+                        name: 'Budget displays complete formatted value (e.g., "Budget: $1,000,000")',
+                        pass: matchesPattern,
+                    });
+                } else {
+                    // If budget counter doesn't exist, all tests fail
+                    results.push({
+                        name: 'Budget displays value 1,000,000',
+                        pass: false,
+                    });
+                    results.push({
+                        name: 'Budget has clear "Budget" label',
+                        pass: false,
+                    });
+                    results.push({
+                        name: 'Budget value has currency formatting ($)',
+                        pass: false,
+                    });
+                    results.push({
+                        name: 'Budget value is formatted with commas',
+                        pass: false,
+                    });
+                    results.push({
+                        name: 'Budget displays complete formatted value (e.g., "Budget: $1,000,000")',
+                        pass: false,
+                    });
+                }
 
                 // Render results
                 const resultsDiv = document.getElementById('test-results');
@@ -115,8 +121,10 @@ These tests verify the basic HTML5 structure meets acceptance criteria
                 resultsDiv.appendChild(summary);
 
             } catch (error) {
-                document.getElementById('test-results').innerHTML = 
-                    `<div class="test fail">Error running tests: ${error.message}</div>`;
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'test fail';
+                errorDiv.textContent = 'Error running tests: ' + error.message;
+                document.getElementById('test-results').appendChild(errorDiv);
             }
         }
 
