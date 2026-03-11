@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stellar Command Academy</title>
+    <style>
+        /* Space-themed dashboard styles */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #0a0e27 0%, #16213e 50%, #0f3460 100%);
+            background-attachment: fixed;
+            color: #00ff88;
+            min-height: 100vh;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .budget-counter {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff88;
+            padding: 25px;
+            background: linear-gradient(135deg, rgba(0, 20, 40, 0.8), rgba(10, 35, 70, 0.8));
+            border: 2px solid #00ff88;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.05);
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .budget-counter:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5), inset 0 0 30px rgba(0, 255, 136, 0.1);
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.8);
+        }
+
+        .mission-list-container {
+            margin-top: 30px;
+            background: linear-gradient(135deg, rgba(0, 20, 40, 0.85), rgba(10, 35, 70, 0.85));
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 25px;
+            min-height: 300px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2), inset 0 0 30px rgba(0, 255, 255, 0.05);
+        }
+
+        .mission-list-container h2 {
+            font-size: 1.8rem;
+            color: #00ffff;
+            margin: 0 0 25px 0;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .mission-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .mission-list li {
+            padding: 15px;
+            background: linear-gradient(90deg, rgba(0, 255, 136, 0.05), rgba(0, 255, 200, 0.05));
+            border-left: 3px solid #00ff88;
+            border-radius: 4px;
+            color: #e0e0ff;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .mission-list li::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.1), transparent);
+            transition: left 0.3s ease;
+        }
+
+        .mission-list li:hover::before {
+            left: 100%;
+        }
+
+        .mission-list li:hover {
+            background: linear-gradient(90deg, rgba(0, 255, 136, 0.15), rgba(0, 255, 200, 0.15));
+            border-left-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3), inset 0 0 10px rgba(0, 255, 136, 0.1);
+            color: #00ff88;
+            transform: translateX(5px);
+        }
+
+        .mission-list.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 250px;
+            color: #666688;
+            font-size: 1.1rem;
+            border: 1px dashed #555577;
+            border-radius: 4px;
+        }
+
+        /* Button styles for interactive elements */
+        button {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #00ff88, #00ffcc);
+            color: #0a0e27;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #00ffcc, #00ff88);
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.6), 0 0 40px rgba(0, 255, 200, 0.3);
+            transform: translate(0, -2px);
+        }
+
+        button:active {
+            transform: translate(0, 0);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.4), inset 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 20, 40, 0.5);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00ff88, #00ffff);
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #00ffcc, #00ff88);
+        }
+    </style>
+</head>
+<body>
+    <main id="dashboard-container" class="dashboard">
+        <!-- Main dashboard content will go here -->
+        <div data-budget-counter class="budget-counter">
+            Budget: $1,000,000
+        </div>
+
+        <section class="mission-list-container">
+            <h2>Available Missions</h2>
+            <ul class="mission-list empty" id="missionList">
+                <li>No missions available yet. Check back soon!</li>
+            </ul>
+        </section>
+    </main>
+</body>
+</html>
