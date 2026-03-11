@@ -1,0 +1,127 @@
+<!-- 
+HTML Structure Validation Tests for index.html
+These tests verify the basic HTML5 structure meets acceptance criteria
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>HTML Structure Tests</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>HTML Structure Validation Tests</h1>
+    <div id="test-results"></div>
+
+    <script>
+        async function runTests() {
+            const results = [];
+            
+            try {
+                // Fetch the index.html file
+                const response = await fetch('./index.html');
+                const htmlContent = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+
+                // Test 1: Verify DOCTYPE
+                results.push({
+                    name: 'HTML5 DOCTYPE present',
+                    pass: htmlContent.toLowerCase().includes('<!doctype html>'),
+                });
+
+                // Test 2: Verify lang attribute
+                const htmlElement = doc.documentElement;
+                results.push({
+                    name: 'HTML lang attribute set',
+                    pass: htmlElement.getAttribute('lang') === 'en',
+                });
+
+                // Test 3: Verify head section exists
+                const headElement = doc.querySelector('head');
+                results.push({
+                    name: 'Head section exists',
+                    pass: !!headElement,
+                });
+
+                // Test 4: Verify title element
+                const titleElement = doc.querySelector('title');
+                results.push({
+                    name: 'Title element present',
+                    pass: !!titleElement && titleElement.textContent.length > 0,
+                });
+
+                // Test 5: Verify charset meta tag
+                const charsetMeta = doc.querySelector('meta[charset]');
+                results.push({
+                    name: 'Charset meta tag present',
+                    pass: !!charsetMeta && charsetMeta.getAttribute('charset') === 'UTF-8',
+                });
+
+                // Test 6: Verify viewport meta tag
+                const viewportMeta = doc.querySelector('meta[name="viewport"]');
+                results.push({
+                    name: 'Viewport meta tag present',
+                    pass: !!viewportMeta,
+                });
+
+                // Test 7: Verify body section exists
+                const bodyElement = doc.querySelector('body');
+                results.push({
+                    name: 'Body section exists',
+                    pass: !!bodyElement,
+                });
+
+                // Test 8: Verify main dashboard container
+                const dashboardContainer = doc.querySelector('main#dashboard-container');
+                results.push({
+                    name: 'Main dashboard container with id exists',
+                    pass: !!dashboardContainer,
+                });
+
+                // Test 9: Verify main element has dashboard class
+                const mainElement = doc.querySelector('main');
+                results.push({
+                    name: 'Main element has dashboard class',
+                    pass: !!mainElement && mainElement.classList.contains('dashboard'),
+                });
+
+                // Render results
+                const resultsDiv = document.getElementById('test-results');
+                let passCount = 0;
+                let failCount = 0;
+
+                results.forEach(test => {
+                    const testDiv = document.createElement('div');
+                    testDiv.className = `test ${test.pass ? 'pass' : 'fail'}`;
+                    testDiv.textContent = `${test.pass ? '✓' : '✗'} ${test.name}`;
+                    resultsDiv.appendChild(testDiv);
+
+                    if (test.pass) passCount++;
+                    else failCount++;
+                });
+
+                // Summary
+                const summary = document.createElement('div');
+                summary.style.marginTop = '20px';
+                summary.style.fontSize = '16px';
+                summary.style.fontWeight = 'bold';
+                summary.textContent = `Results: ${passCount} passed, ${failCount} failed`;
+                resultsDiv.appendChild(summary);
+
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = 
+                    `<div class="test fail">Error running tests: ${error.message}</div>`;
+            }
+        }
+
+        // Run tests when page loads
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>
