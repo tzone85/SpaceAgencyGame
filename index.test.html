@@ -1,0 +1,121 @@
+<!-- 
+Dashboard Title Display Tests
+Tests verify that 'Stellar Command Academy' title is present and properly formatted
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Title Tests</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ddd; }
+        .pass { background-color: #d4edda; color: #155724; }
+        .fail { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Dashboard Title Validation Tests</h1>
+    <div id="test-results"></div>
+
+    <script>
+        async function runTests() {
+            const results = [];
+            
+            try {
+                // Fetch the index.html file
+                const response = await fetch('./index.html');
+                const htmlContent = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(htmlContent, 'text/html');
+
+                // Test 1: Verify "Stellar Command Academy" title text is present
+                const titleText = "Stellar Command Academy";
+                const titleExists = htmlContent.includes(titleText);
+                results.push({
+                    name: `Title text "${titleText}" is present in the page`,
+                    pass: titleExists,
+                });
+
+                // Test 2: Verify title uses h1 or h2 tag
+                const h1Title = doc.querySelector('h1');
+                const h2Title = doc.querySelector('h2');
+                const headingExists = (h1Title || h2Title) !== null;
+                results.push({
+                    name: 'Title uses h1 or h2 heading tag',
+                    pass: headingExists,
+                });
+
+                // Test 3: Verify the heading text matches "Stellar Command Academy"
+                const headingElement = h1Title || h2Title;
+                const headingTextMatches = headingElement && 
+                    headingElement.textContent.trim() === titleText;
+                results.push({
+                    name: `Heading text exactly matches "${titleText}"`,
+                    pass: headingTextMatches,
+                });
+
+                // Test 4: Verify main dashboard container exists
+                const dashboardContainer = doc.querySelector('main#dashboard-container');
+                results.push({
+                    name: 'Main dashboard container with id exists',
+                    pass: !!dashboardContainer,
+                });
+
+                // Test 5: Verify main element has dashboard class
+                const mainElement = doc.querySelector('main');
+                results.push({
+                    name: 'Main element has dashboard class',
+                    pass: !!mainElement && mainElement.classList.contains('dashboard'),
+                });
+
+                // Test 6: Verify heading is inside the dashboard container
+                const headingInsideContainer = dashboardContainer && 
+                    dashboardContainer.querySelector('h1, h2') !== null;
+                results.push({
+                    name: 'Title heading is inside the dashboard container',
+                    pass: headingInsideContainer,
+                });
+
+                // Test 7: Verify title is first child or near top of container
+                const firstChild = dashboardContainer ? dashboardContainer.firstElementChild : null;
+                const isFirstChild = firstChild && (firstChild.tagName === 'H1' || firstChild.tagName === 'H2');
+                results.push({
+                    name: 'Title heading is prominently displayed at top of dashboard',
+                    pass: isFirstChild,
+                });
+
+                // Render results
+                const resultsDiv = document.getElementById('test-results');
+                let passCount = 0;
+                let failCount = 0;
+
+                results.forEach(test => {
+                    const testDiv = document.createElement('div');
+                    testDiv.className = `test ${test.pass ? 'pass' : 'fail'}`;
+                    testDiv.textContent = `${test.pass ? '✓' : '✗'} ${test.name}`;
+                    resultsDiv.appendChild(testDiv);
+
+                    if (test.pass) passCount++;
+                    else failCount++;
+                });
+
+                // Summary
+                const summary = document.createElement('div');
+                summary.style.marginTop = '20px';
+                summary.style.fontSize = '16px';
+                summary.style.fontWeight = 'bold';
+                summary.textContent = `Results: ${passCount} passed, ${failCount} failed`;
+                resultsDiv.appendChild(summary);
+
+            } catch (error) {
+                document.getElementById('test-results').innerHTML = 
+                    `<div class="test fail">Error running tests: ${error.message}</div>`;
+            }
+        }
+
+        // Run tests when page loads
+        window.addEventListener('load', runTests);
+    </script>
+</body>
+</html>
