@@ -1,4 +1,4 @@
-<!-- 
+<!--
 Budget Counter Display Tests
 These tests verify the budget counter element meets acceptance criteria
 -->
@@ -21,7 +21,7 @@ These tests verify the budget counter element meets acceptance criteria
     <script>
         async function runTests() {
             const results = [];
-            
+
             try {
                 // Fetch the index.html file
                 const response = await fetch('./index.html');
@@ -53,7 +53,7 @@ These tests verify the budget counter element meets acceptance criteria
                     });
 
                     // Test 4: Verify budget has currency formatting ($ or currency symbol)
-                    const hasCurrency = /[$]|[$]/.test(text);
+                    const hasCurrency = /[$]/.test(text);
                     results.push({
                         name: 'Budget value has currency formatting ($)',
                         pass: hasCurrency,
@@ -121,8 +121,10 @@ These tests verify the budget counter element meets acceptance criteria
                 resultsDiv.appendChild(summary);
 
             } catch (error) {
-                document.getElementById('test-results').innerHTML = 
-                    `<div class="test fail">Error running tests: ${error.message}</div>`;
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'test fail';
+                errorDiv.textContent = 'Error running tests: ' + error.message;
+                document.getElementById('test-results').appendChild(errorDiv);
             }
         }
 
