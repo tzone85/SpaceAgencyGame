@@ -45,3 +45,15 @@ Thumbs.db
 *.tmp
 *.temp
 .cache/
+
+# VXD artifacts
+.vxd-prompts/
+CLAUDE.md
+.serena/
+firebase-debug.log
+
+# VXD artifacts
+.vxd-prompts/
+CLAUDE.md
+.serena/
+firebase-debug.log
