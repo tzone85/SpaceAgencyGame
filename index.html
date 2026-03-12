@@ -5,10 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Stellar Command Academy</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 20px;
+            background-color: #fafafa;
         }
 
         .dashboard {
@@ -25,11 +30,12 @@
             border-radius: 8px;
             border-left: 4px solid #4CAF50;
             margin-bottom: 20px;
+            transition: color 0.3s ease;
         }
 
         .mission-list-container {
             margin-top: 30px;
-            background: #f9f9f9;
+            background: #fff;
             border: 2px solid #ddd;
             border-radius: 8px;
             padding: 20px;
@@ -40,14 +46,16 @@
             font-size: 1.5rem;
             color: #333;
             margin-bottom: 20px;
+            margin-top: 0;
         }
 
         .mission-list {
             list-style: none;
             padding: 0;
+            margin: 0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
 
         .mission-list.empty {
@@ -55,62 +63,134 @@
             align-items: center;
             justify-content: center;
             min-height: 250px;
-            color: #666;
+            color: #999;
             font-size: 1.1rem;
         }
 
-        .mission-entry {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 20px;
+        .mission-item {
+            padding: 15px;
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
             border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: background-color 0.2s ease;
         }
 
-        .mission-entry:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        .mission-item:hover {
+            background: #f0f0f0;
         }
 
-        .mission-entry-content {
+        .mission-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 20px;
+        }
+
+        .mission-info {
             flex: 1;
         }
 
-        .mission-entry-planet {
-            font-weight: bold;
+        .mission-info h3 {
+            margin: 0 0 5px 0;
+            color: #333;
             font-size: 1.1rem;
-            margin-bottom: 4px;
         }
 
-        .mission-entry-cost {
-            font-size: 0.9rem;
-            opacity: 0.9;
+        .mission-info p {
+            margin: 0 0 8px 0;
+            color: #666;
+            font-size: 0.95rem;
         }
 
-        .launch-mission-btn {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 1rem;
-            cursor: pointer;
+        .mission-cost {
+            display: inline-block;
             font-weight: bold;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+            color: #4CAF50;
+            font-size: 0.95rem;
         }
 
-        .launch-mission-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        .mission-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            min-width: 180px;
         }
 
-        .launch-mission-btn:active {
-            transform: scale(0.98);
+        .launch-btn {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            width: 100%;
+        }
+
+        .launch-btn:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+
+        .launch-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .mission-warning {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin: 0;
+            text-align: right;
+            max-width: 180px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .notification-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .notification-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
         }
     </style>
 </head>
@@ -123,73 +203,66 @@
 
         <section class="mission-list-container">
             <h2>Available Missions</h2>
-            <button id="launchMissionBtn" class="launch-mission-btn">Launch Mission</button>
             <ul class="mission-list empty" id="missionList">
                 <li>No missions available yet. Check back soon!</li>
             </ul>
         </section>
     </main>
 
+    <script src="mission-manager.js"></script>
+    <script src="ui-controller.js"></script>
     <script>
-        // Sample mission data
-        const missions = [
-            { planet: 'Mars', cost: 50000 },
-            { planet: 'Venus', cost: 75000 },
-            { planet: 'Jupiter', cost: 150000 },
-            { planet: 'Saturn', cost: 200000 },
-            { planet: 'Neptune', cost: 250000 }
-        ];
+        // Initialize the mission management system when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Create mission manager with initial budget
+            const manager = new MissionManager(1000000);
 
-        let missionIndex = 0;
+            // Add sample missions
+            manager.addMission({
+                id: 'alpha',
+                name: 'Explore Alpha Centauri',
+                cost: 150000,
+                description: 'Survey the nearest star system for habitable planets.'
+            });
 
-        // Function to create a mission entry
-        function createMissionEntry(planet, cost) {
-            const li = document.createElement('li');
-            li.className = 'mission-entry';
+            manager.addMission({
+                id: 'beta',
+                name: 'Research Beta Station',
+                cost: 250000,
+                description: 'Conduct deep space research at Beta Station.'
+            });
 
-            const content = document.createElement('div');
-            content.className = 'mission-entry-content';
+            manager.addMission({
+                id: 'gamma',
+                name: 'Rescue Gamma Team',
+                cost: 500000,
+                description: 'Emergency rescue mission for the stranded Gamma team.'
+            });
 
-            const planetName = document.createElement('div');
-            planetName.className = 'mission-entry-planet';
-            planetName.textContent = planet;
+            manager.addMission({
+                id: 'delta',
+                name: 'Map Delta Nebula',
+                cost: 75000,
+                description: 'Create detailed maps of the Delta Nebula region.'
+            });
 
-            const costDisplay = document.createElement('div');
-            costDisplay.className = 'mission-entry-cost';
-            costDisplay.textContent = 'Cost: $' + cost.toLocaleString();
+            manager.addMission({
+                id: 'epsilon',
+                name: 'Supply Epsilon Base',
+                cost: 100000,
+                description: 'Deliver supplies to remote Epsilon Base.'
+            });
 
-            content.appendChild(planetName);
-            content.appendChild(costDisplay);
-            li.appendChild(content);
+            // Create UI controller
+            const controller = new UIController(manager);
 
-            return li;
-        }
-
-        // Function to add a mission to the list
-        function addMission() {
+            // Get DOM elements
+            const budgetDisplay = document.querySelector('[data-budget-counter]');
             const missionList = document.getElementById('missionList');
 
-            // Get the next mission (cycle through available missions)
-            const mission = missions[missionIndex % missions.length];
-            missionIndex++;
-
-            // Remove empty message on first mission
-            if (missionList.classList.contains('empty')) {
-                missionList.innerHTML = '';
-                missionList.classList.remove('empty');
-            }
-
-            // Create and append the mission entry
-            const missionEntry = createMissionEntry(mission.planet, mission.cost);
-            missionList.appendChild(missionEntry);
-        }
-
-        // Set up event listener for the Launch Mission button
-        document.addEventListener('DOMContentLoaded', function() {
-            const launchBtn = document.getElementById('launchMissionBtn');
-            if (launchBtn) {
-                launchBtn.addEventListener('click', addMission);
-            }
+            // Initialize UI
+            controller.init(budgetDisplay, missionList);
+            controller.renderMissions();
         });
     </script>
 </body>
