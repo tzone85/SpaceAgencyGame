@@ -22,8 +22,6 @@ A JavaScript-based budget tracking system for a space agency mission control gam
 
 - `index.html` - Main HTML interface
 - `styles.css` - Styling for the application
-- `budget.js` - Budget tracker implementation
-- `budget.test.js` - Unit tests for budget tracking logic
 
 ## Usage
 
@@ -37,14 +35,6 @@ Open `index.html` in a web browser to use the application.
 2. **Launch Missions**: Click "Launch" to send a mission (if budget permits)
 3. **Insufficient Budget**: If you don't have enough budget, the button is disabled
 4. **Reset Budget**: Click "Reset Budget" to restore the default budget
-
-### Testing
-
-Run tests in Node.js:
-
-```bash
-node budget.test.js
-```
 
 ## Implementation Details
 
