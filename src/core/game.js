@@ -1,56 +1,42 @@
 /**
- * Game Class
- *
- * Main game controller that manages the overall game state,
- * initializes the engine, and handles the game lifecycle.
+ * Game Controller
+ * Manages the overall game state and lifecycle
  */
 
-import Engine from "./engine.js";
+import { Engine } from './engine.js';
+import { Renderer } from './renderer.js';
 
 class Game {
   constructor() {
     this.engine = new Engine();
+    this.renderer = new Renderer();
     this.isRunning = false;
   }
 
-  /**
-   * Start the game
-   */
   start() {
-    console.log("Starting Stellar Command...");
+    console.log('Game started');
     this.isRunning = true;
-    this.engine.initialize();
     this.engine.start();
   }
 
-  /**
-   * Stop the game
-   */
   stop() {
-    console.log("Stopping Stellar Command...");
+    console.log('Game stopped');
     this.isRunning = false;
     this.engine.stop();
   }
 
-  /**
-   * Get the current game state
-   */
-  getState() {
-    return {
-      isRunning: this.isRunning,
-      engineStats: this.engine.getStats(),
-    };
+  update(deltaTime) {
+    if (this.isRunning) {
+      this.engine.update(deltaTime);
+    }
   }
 
-  /**
-   * Destroy the game and cleanup resources
-   */
-  destroy() {
+  render() {
     if (this.isRunning) {
-      this.stop();
+      this.renderer.render();
     }
-    this.engine.destroy();
   }
 }
 
 export default Game;
+export { Game };

@@ -1,17 +1,6 @@
 /**
- * Stellar Command - Main Stylesheet
- * 
- * Core styling for the Stellar Command game interface.
- * This stylesheet provides base styles, layout, and responsive design.
+ * Main stylesheet for Stellar Command
  */
-
-:root {
-  --color-primary: #00d4ff;
-  --color-secondary: #ff6b00;
-  --color-background: #000000;
-  --color-text: #ffffff;
-  --color-border: #00d4ff;
-}
 
 * {
   margin: 0;
@@ -22,10 +11,10 @@
 html, body {
   width: 100%;
   height: 100%;
-  font-family: 'Arial', sans-serif;
-  background-color: var(--color-background);
-  color: var(--color-text);
   overflow: hidden;
+  background-color: #000000;
+  font-family: 'Arial', sans-serif;
+  color: #ffffff;
 }
 
 canvas {
@@ -34,25 +23,37 @@ canvas {
   height: 100%;
 }
 
-/* UI Elements */
-.ui-container {
-  position: absolute;
-  pointer-events: none;
+/* Game UI Styles */
+.game-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.ui-element {
-  pointer-events: auto;
+.game-header {
+  background-color: #1a1a2e;
+  padding: 10px 20px;
+  border-bottom: 1px solid #0f3460;
 }
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  :root {
-    font-size: 14px;
-  }
+.game-content {
+  flex: 1;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
 }
 
-@media (max-width: 768px) {
-  :root {
-    font-size: 12px;
-  }
+.sidebar {
+  width: 250px;
+  background-color: #16213e;
+  border: 1px solid #0f3460;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.main-area {
+  flex: 1;
+  background-color: #0f1419;
+  border: 1px solid #0f3460;
 }

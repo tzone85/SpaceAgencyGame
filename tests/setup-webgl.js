@@ -1,80 +1,44 @@
 /**
- * Jest Setup File for WebGL Mocking
- * 
- * Mocks the WebGL context for tests running in jsdom environment
+ * WebGL Mocking Setup
+ * Provides mock WebGL context for testing
  */
 
-// Create a mock WebGL context
-function createMockWebGLContext() {
-  return {
-    // Basic WebGL context methods
-    enable: () => {},
-    disable: () => {},
-    blendFunc: () => {},
-    viewport: () => {},
-    clearColor: () => {},
-    clear: () => {},
-    createProgram: () => ({}),
-    createShader: () => ({}),
-    attachShader: () => {},
-    linkProgram: () => {},
-    shaderSource: () => {},
-    compileShader: () => {},
-    getProgramParameter: () => true,
-    getShaderParameter: () => true,
-    getProgramInfoLog: () => '',
-    getShaderInfoLog: () => '',
-    deleteProgram: () => {},
-    deleteShader: () => {},
-    createBuffer: () => ({}),
-    bindBuffer: () => {},
-    bufferData: () => {},
-    getSupportedExtensions: () => [],
-    getParameter: function(param) {
-      if (param === 0x0BA6) { // VIEWPORT
-        return [0, 0, 800, 600];
-      }
-      return null;
-    },
-    // Capabilities
-    BLEND: 3042,
-    SRC_ALPHA: 0x0302,
-    ONE_MINUS_SRC_ALPHA: 0x0303,
-    ARRAY_BUFFER: 34962,
-    ELEMENT_ARRAY_BUFFER: 34963,
-    STATIC_DRAW: 35044,
-    COLOR_BUFFER_BIT: 16384,
-    DEPTH_BUFFER_BIT: 256,
-    VERTEX_SHADER: 35633,
-    FRAGMENT_SHADER: 35632,
-    LINK_STATUS: 35714,
-    COMPILE_STATUS: 35713,
-  };
-}
-
-// Mock canvas getContext to return a WebGL context
-HTMLCanvasElement.prototype.getContext = function(contextType) {
-  if (contextType === 'webgl2' || contextType === 'webgl') {
-    return createMockWebGLContext();
+// Mock Canvas context
+HTMLCanvasElement.prototype.getContext = function(contextId) {
+  if (contextId === 'webgl' || contextId === 'webgl2') {
+    const mockFn = (fn) => fn;
+    return {
+      clear: mockFn(() => {}),
+      clearColor: mockFn(() => {}),
+      enable: mockFn(() => {}),
+      disable: mockFn(() => {}),
+      viewport: mockFn(() => {}),
+      useProgram: mockFn(() => {}),
+      createProgram: mockFn(() => ({})),
+      createShader: mockFn(() => ({})),
+      shaderSource: mockFn(() => {}),
+      compileShader: mockFn(() => {}),
+      attachShader: mockFn(() => {}),
+      linkProgram: mockFn(() => {}),
+      getUniformLocation: mockFn(() => ({})),
+      uniform1f: mockFn(() => {}),
+      uniform2f: mockFn(() => {}),
+      uniform3f: mockFn(() => {}),
+      uniform4f: mockFn(() => {}),
+      uniformMatrix4fv: mockFn(() => {}),
+      COLOR_BUFFER_BIT: 0x4000,
+      DEPTH_BUFFER_BIT: 0x100,
+    };
   }
   return null;
 };
 
-// Mock window.requestAnimationFrame if needed
-if (typeof window.requestAnimationFrame === 'undefined') {
-  window.requestAnimationFrame = (callback) => {
-    return setTimeout(callback, 1000 / 60);
-  };
-}
+// Mock window.requestAnimationFrame
+global.requestAnimationFrame = (callback) => {
+  return setTimeout(callback, 0);
+};
 
-// Mock window.cancelAnimationFrame if needed
-if (typeof window.cancelAnimationFrame === 'undefined') {
-  window.cancelAnimationFrame = (id) => {
-    clearTimeout(id);
-  };
-}
-
-// Mock performance.now if needed
-if (typeof performance.now === 'undefined') {
-  performance.now = () => Date.now();
-}
+// Mock performance API
+global.performance = {
+  now: () => Date.now(),
+};

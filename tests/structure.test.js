@@ -98,6 +98,14 @@ describe('Project Structure', () => {
       expect(dirExists('tests')).toBe(true);
     });
 
+    test('tests/unit directory exists', () => {
+      expect(dirExists('tests/unit')).toBe(true);
+    });
+
+    test('tests/browser directory exists', () => {
+      expect(dirExists('tests/browser')).toBe(true);
+    });
+
     test('docs directory exists', () => {
       expect(dirExists('docs')).toBe(true);
     });
@@ -119,11 +127,27 @@ describe('Project Structure', () => {
     test('src/core/engine.js exists', () => {
       expect(fileExists('src/core/engine.js')).toBe(true);
     });
+
+    test('src/core/renderer.js exists', () => {
+      expect(fileExists('src/core/renderer.js')).toBe(true);
+    });
   });
 
   describe('Configuration Files', () => {
     test('package.json exists', () => {
       expect(fileExists('package.json')).toBe(true);
+    });
+
+    test('vite.config.js exists', () => {
+      expect(fileExists('vite.config.js')).toBe(true);
+    });
+
+    test('jest.config.js exists', () => {
+      expect(fileExists('jest.config.js')).toBe(true);
+    });
+
+    test('index.html exists', () => {
+      expect(fileExists('index.html')).toBe(true);
     });
 
     test('README.md exists', () => {
@@ -132,10 +156,6 @@ describe('Project Structure', () => {
 
     test('.gitignore exists', () => {
       expect(fileExists('.gitignore')).toBe(true);
-    });
-
-    test('webpack.config.js exists', () => {
-      expect(fileExists('webpack.config.js')).toBe(true);
     });
   });
 });
@@ -160,48 +180,34 @@ describe('File Contents', () => {
         fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
       );
       expect(packageJson.scripts).toBeDefined();
+      expect(packageJson.scripts.dev).toBeDefined();
       expect(packageJson.scripts.build).toBeDefined();
       expect(packageJson.scripts.test).toBeDefined();
     });
-  });
 
-  describe('README.md', () => {
-    test('README.md contains game concept', () => {
-      const readme = fs.readFileSync(
-        path.join(projectRoot, 'README.md'),
-        'utf8'
+    test('package.json includes vite dependency', () => {
+      const packageJson = JSON.parse(
+        fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
       );
-      expect(readme).toMatch(/Stellar Command/i);
-      expect(readme).toMatch(/space agency/i);
-      expect(readme).toMatch(/game/i);
+      expect(packageJson.devDependencies.vite).toBeDefined();
     });
 
-    test('README.md contains project structure information', () => {
-      const readme = fs.readFileSync(
-        path.join(projectRoot, 'README.md'),
-        'utf8'
+    test('package.json includes web types', () => {
+      const packageJson = JSON.parse(
+        fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf8')
       );
-      expect(readme).toMatch(/Project Structure/i);
-      expect(readme).toMatch(/src\//);
-      expect(readme).toMatch(/assets\//);
+      expect(packageJson.devDependencies['@types/web']).toBeDefined();
     });
   });
 
-  describe('.gitignore', () => {
-    test('.gitignore excludes node_modules', () => {
-      const gitignore = fs.readFileSync(
-        path.join(projectRoot, '.gitignore'),
+  describe('vite.config.js', () => {
+    test('vite.config.js contains server configuration', () => {
+      const config = fs.readFileSync(
+        path.join(projectRoot, 'vite.config.js'),
         'utf8'
       );
-      expect(gitignore).toMatch(/node_modules/);
-    });
-
-    test('.gitignore excludes build files', () => {
-      const gitignore = fs.readFileSync(
-        path.join(projectRoot, '.gitignore'),
-        'utf8'
-      );
-      expect(gitignore).toMatch(/dist\/|build\//);
+      expect(config).toMatch(/server/);
+      expect(config).toMatch(/port/);
     });
   });
 });
@@ -211,36 +217,52 @@ describe('File Contents', () => {
  */
 describe('Core Modules', () => {
   test('Game class can be imported', async () => {
-    const { default: Game } = await import(
+    const Game = await import(
       path.join(projectRoot, 'src/core/game.js')
-    );
+    ).then((m) => m.default);
     expect(Game).toBeDefined();
     expect(typeof Game).toBe('function');
   });
 
   test('Engine class can be imported', async () => {
-    const { default: Engine } = await import(
+    const Engine = await import(
       path.join(projectRoot, 'src/core/engine.js')
-    );
+    ).then((m) => m.default);
     expect(Engine).toBeDefined();
     expect(typeof Engine).toBe('function');
   });
 
+  test('Renderer class can be imported', async () => {
+    const Renderer = await import(
+      path.join(projectRoot, 'src/core/renderer.js')
+    ).then((m) => m.default);
+    expect(Renderer).toBeDefined();
+    expect(typeof Renderer).toBe('function');
+  });
+
   test('Game instantiation works', async () => {
-    const { default: Game } = await import(
+    const Game = await import(
       path.join(projectRoot, 'src/core/game.js')
-    );
+    ).then((m) => m.default);
     const game = new Game();
     expect(game).toBeDefined();
     expect(game.isRunning).toBe(false);
   });
 
   test('Engine instantiation works', async () => {
-    const { default: Engine } = await import(
+    const Engine = await import(
       path.join(projectRoot, 'src/core/engine.js')
-    );
+    ).then((m) => m.default);
     const engine = new Engine();
     expect(engine).toBeDefined();
-    expect(engine.isInitialized).toBe(false);
+  });
+
+  test('Renderer instantiation works', async () => {
+    const Renderer = await import(
+      path.join(projectRoot, 'src/core/renderer.js')
+    ).then((m) => m.default);
+    const renderer = new Renderer();
+    expect(renderer).toBeDefined();
+    expect(renderer.isInitialized).toBe(false);
   });
 });

@@ -1,8 +1,6 @@
 /**
- * Engine Class
- *
- * Core game engine that handles rendering, game loop,
- * and system updates. Acts as the heart of the game.
+ * Game Loop Engine
+ * Handles the main game loop and timing
  */
 
 import Renderer from "./renderer.js";
@@ -12,15 +10,14 @@ import SpaceScene from "../scenes/space-scene.js";
 
 class Engine {
   constructor() {
-    this.isInitialized = false;
-    this.isRunning = false;
-    this.frameCount = 0;
+    this.frameRate = 60;
     this.deltaTime = 0;
     this.lastTime = 0;
     this.currentTime = 0;
     this.fpsTarget = 60;
     this.frameInterval = 1000 / this.fpsTarget;
     this.animationFrameId = null;
+    this.isRunning = false;
 
     // Canvas and renderer
     this.canvas = null;
@@ -168,9 +165,10 @@ class Engine {
     }
 
     console.log("Starting 3D game loop at 60 FPS...");
+    console.log('Engine started');
     this.isRunning = true;
     this.lastTime = performance.now();
-    this.gameLoop();
+    this.loop();
   }
 
   /**
@@ -202,6 +200,8 @@ class Engine {
    * Update game state
    */
   update(deltaTime) {
+    // Update game logic
+    console.log('Engine update:', deltaTime);
     this.frameCount++;
     
     // Update camera
@@ -275,18 +275,8 @@ class Engine {
    * Stop the game loop
    */
   stop() {
-    if (!this.isRunning) {
-      console.warn("Game loop is not running");
-      return;
-    }
-
-    console.log("Stopping game loop...");
+    console.log('Engine stopped');
     this.isRunning = false;
-
-    if (this.animationFrameId) {
-      cancelAnimationFrame(this.animationFrameId);
-      this.animationFrameId = null;
-    }
   }
 
   /**
@@ -306,11 +296,15 @@ class Engine {
     };
   }
 
-  /**
-   * Cleanup and destroy engine resources
-   */
   destroy() {
+    // Stop the game loop
     this.stop();
+
+    // Cancel animation frame
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
 
     // Remove resize handler
     if (this.resizeHandler) {
@@ -342,6 +336,18 @@ class Engine {
     this.isInitialized = false;
     console.log("Engine destroyed");
   }
+
+  loop() {
+    if (!this.isRunning) return;
+
+    const now = performance.now();
+    this.deltaTime = (now - this.lastTime) / 1000;
+    this.lastTime = now;
+
+    this.update(this.deltaTime);
+    requestAnimationFrame(() => this.loop());
+  }
 }
 
 export default Engine;
+export { Engine };
