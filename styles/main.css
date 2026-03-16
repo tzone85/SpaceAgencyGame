@@ -1,0 +1,58 @@
+/**
+ * Stellar Command - Main Stylesheet
+ * 
+ * Core styling for the Stellar Command game interface.
+ * This stylesheet provides base styles, layout, and responsive design.
+ */
+
+:root {
+  --color-primary: #00d4ff;
+  --color-secondary: #ff6b00;
+  --color-background: #000000;
+  --color-text: #ffffff;
+  --color-border: #00d4ff;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: 'Arial', sans-serif;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  overflow: hidden;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* UI Elements */
+.ui-container {
+  position: absolute;
+  pointer-events: none;
+}
+
+.ui-element {
+  pointer-events: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  :root {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    font-size: 12px;
+  }
+}
