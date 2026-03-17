@@ -2,6 +2,7 @@ export default {
   testEnvironment: "jsdom",
   transform: {
     "^.+\\.jsx?$": ["babel-jest", { presets: ["@babel/preset-env"] }],
+    '^.+\\.js$': 'babel-jest',
   },
   extensionsToTreatAsEsm: [],
   moduleNameMapper: {
