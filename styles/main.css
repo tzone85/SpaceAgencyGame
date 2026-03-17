@@ -90,7 +90,9 @@ html {
 }
 
 body {
-  background-color: var(--color-bg-primary);
+  margin: 0;
+  padding: 0;
+  background-color: #0a0e27;
   color: var(--color-text-primary);
   font-family: var(--font-data);
   line-height: 1.5;
@@ -294,6 +296,21 @@ small {
   border: 1px solid #0f3460;
 }
 
+/* Main menu container */
+.main-menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%);
+  z-index: 1000;
+}
+
 /* Grid container */
 .grid {
   display: grid;
@@ -379,7 +396,89 @@ small {
 }
 
 /* ============================================================================
-   6. UTILITY CLASSES
+   6. MAIN MENU SPECIFIC STYLES
+   ============================================================================ */
+
+/* Animated game title */
+.game-title {
+  font-size: 4rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 3rem;
+  letter-spacing: 0.2em;
+  color: #00ffff;
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #0088ff;
+  animation: titlePulse 2s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+/* Title pulse animation */
+@keyframes titlePulse {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #0088ff;
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+    text-shadow: 0 0 20px #00ffff, 0 0 40px #0088ff, 0 0 60px #00ff88;
+  }
+  100% {
+    opacity: 0.7;
+    transform: scale(1);
+    text-shadow: 0 0 10px #00ffff, 0 0 20px #0088ff;
+  }
+}
+
+/* Menu buttons container */
+.menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+/* Menu button styling */
+.menu-button {
+  padding: 1rem 3rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  background-color: transparent;
+  color: #00ffff;
+  border: 2px solid #00ffff;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  text-transform: uppercase;
+}
+
+/* Menu button hover effect */
+.menu-button:hover {
+  background-color: rgba(0, 255, 255, 0.1);
+  box-shadow: 0 0 10px #00ffff, inset 0 0 10px rgba(0, 255, 255, 0.2);
+  transform: scale(1.05);
+  color: #ffffff;
+  border-color: #00ff88;
+}
+
+/* Menu button active/click effect */
+.menu-button:active {
+  transform: scale(0.98);
+  box-shadow: 0 0 20px #00ffff, inset 0 0 20px rgba(0, 255, 255, 0.3);
+}
+
+/* Menu button focus effect for keyboard navigation */
+.menu-button:focus {
+  outline: 2px solid #00ff88;
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   7. UTILITY CLASSES
    ============================================================================ */
 
 /* Display utilities */
@@ -510,7 +609,7 @@ small {
 }
 
 /* ============================================================================
-   7. RESPONSIVE DESIGN
+   8. RESPONSIVE DESIGN
    ============================================================================ */
 
 @media (max-width: 768px) {
@@ -539,6 +638,20 @@ small {
   .flex {
     flex-direction: column;
   }
+
+  .game-title {
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .menu-button {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+  }
+
+  .menu-buttons {
+    gap: 1rem;
+  }
 }
 
 @media (max-width: 480px) {
@@ -553,10 +666,25 @@ small {
   .m-lg {
     margin: var(--space-md);
   }
+
+  .game-title {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .menu-button {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+    width: 80%;
+  }
+
+  .menu-buttons {
+    gap: 0.8rem;
+  }
 }
 
 /* ============================================================================
-   8. ANIMATION & TRANSITIONS
+   9. ANIMATION & TRANSITIONS
    ============================================================================ */
 
 @keyframes glow {
@@ -595,7 +723,7 @@ small {
 }
 
 /* ============================================================================
-   9. SCROLLBAR STYLING
+   10. SCROLLBAR STYLING
    ============================================================================ */
 
 ::-webkit-scrollbar {
