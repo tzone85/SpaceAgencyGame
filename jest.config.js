@@ -3,6 +3,7 @@ export default {
   transform: {
     "^.+\\.jsx?$": ["babel-jest", { presets: ["@babel/preset-env"] }],
   },
+  extensionsToTreatAsEsm: [],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
@@ -27,5 +28,4 @@ export default {
   globals: {
     jest: true,
   },
-  extensionsToTreatAsEsm: [],
 };
