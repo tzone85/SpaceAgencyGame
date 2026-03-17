@@ -1,26 +1,262 @@
-/**
- * Main stylesheet for Stellar Command
- */
+/* ============================================================================
+   Stellar Command - Core Theme & Glassmorphism Styles
+   Dark space theme with neon accents and glassmorphism components
+   ============================================================================ */
+
+/* ============================================================================
+   1. CSS CUSTOM PROPERTIES - Theme Colors
+   ============================================================================ */
+
+:root {
+  /* Deep space dark theme palette */
+  --color-bg-primary: #0a0a1a;      /* Deep space dark */
+  --color-bg-secondary: #0f0f2e;    /* Slightly lighter dark */
+  --color-bg-tertiary: #1a1a3f;     /* Medium dark space */
+
+  /* Neon accent colors */
+  --color-accent-cyan: #00d4ff;     /* Bright cyan neon */
+  --color-accent-purple: #d946ef;   /* Vibrant purple */
+  --color-accent-green: #10b981;    /* Clean green */
+  --color-accent-pink: #ec4899;     /* Hot pink neon */
+  --color-accent-blue: #3b82f6;     /* Electric blue */
+
+  /* Neutral colors for text */
+  --color-text-primary: #ffffff;    /* Pure white for primary text */
+  --color-text-secondary: #a0aec0;  /* Light gray for secondary */
+  --color-text-tertiary: #64748b;   /* Darker gray for tertiary */
+
+  /* Glass panel colors */
+  --color-glass-bg: rgba(15, 15, 46, 0.6);        /* Glass background */
+  --color-glass-border: rgba(0, 212, 255, 0.2);   /* Cyan-tinted border */
+
+  /* Utility colors */
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Glass effect opacity values */
+  --glass-opacity: 0.6;
+  --glass-blur: 16px;
+  --glass-border-opacity: 0.2;
+
+  /* Typography */
+  --font-game: 'Press Start 2P', 'Courier New', monospace;
+  --font-data: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+
+  /* Spacing scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Border radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Transitions */
+  --transition-fast: 150ms ease-out;
+  --transition-base: 300ms ease-out;
+  --transition-slow: 500ms ease-out;
+
+  /* Shadows - glassmorphism effects */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.5);
+  --shadow-glass: 0 8px 32px rgba(0, 212, 255, 0.1);
+}
+
+/* ============================================================================
+   2. RESET & BASE STYLES
+   ============================================================================ */
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  scrollbar-color: rgba(0, 212, 255, 0.4) rgba(15, 15, 46, 0.4);
+  scrollbar-width: thin;
 }
 
-html, body {
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-data);
+  line-height: 1.5;
+  overflow: hidden;
   width: 100%;
   height: 100%;
-  overflow: hidden;
-  background-color: #000000;
-  font-family: 'Arial', sans-serif;
-  color: #ffffff;
 }
 
 canvas {
   display: block;
+}
+
+/* Remove default styles from interactive elements */
+button,
+a {
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+/* ============================================================================
+   3. TYPOGRAPHY
+   ============================================================================ */
+
+/* Pixel game font for headings and titles */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-game);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+h1 {
+  font-size: 2.5rem;
+  letter-spacing: 2px;
+  margin-bottom: var(--space-xl);
+}
+
+h2 {
+  font-size: 2rem;
+  letter-spacing: 1.5px;
+  margin-bottom: var(--space-lg);
+}
+
+h3 {
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+  margin-bottom: var(--space-md);
+}
+
+h4 {
+  font-size: 1.25rem;
+  letter-spacing: 0.5px;
+  margin-bottom: var(--space-sm);
+}
+
+/* Data font for body text */
+p {
+  font-family: var(--font-data);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+/* Monospace for data display */
+code,
+pre {
+  font-family: 'Courier New', monospace;
+  font-size: 0.75rem;
+  color: var(--color-accent-cyan);
+}
+
+small {
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+
+/* ============================================================================
+   4. GLASSMORPHISM COMPONENTS
+   ============================================================================ */
+
+/* Base glass panel class */
+.glass {
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-glass);
+  transition: all var(--transition-base);
+}
+
+.glass:hover {
+  background: rgba(15, 15, 46, 0.8);
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2);
+}
+
+/* Glass panel with padding */
+.glass-panel {
+  padding: var(--space-lg);
+}
+
+/* Glass panel with accent cyan border */
+.glass-panel-cyan {
+  border-left: 3px solid var(--color-accent-cyan);
+}
+
+/* Glass panel with accent purple border */
+.glass-panel-purple {
+  border-left: 3px solid var(--color-accent-purple);
+}
+
+/* Glass panel with accent pink border */
+.glass-panel-pink {
+  border-left: 3px solid var(--color-accent-pink);
+}
+
+/* Glass panel with accent green border */
+.glass-panel-green {
+  border-left: 3px solid var(--color-accent-green);
+}
+
+/* Intensified glass effect for prominent elements */
+.glass-intense {
+  background: rgba(15, 15, 46, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2),
+    inset 0 0 32px rgba(0, 212, 255, 0.05);
+}
+
+/* Light glass effect for subtle backgrounds */
+.glass-light {
+  background: rgba(15, 15, 46, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+/* ============================================================================
+   5. LAYOUT & CONTAINERS
+   ============================================================================ */
+
+/* Main container */
+.container {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-bg-primary);
+}
+
+/* Full viewport container */
+.container-full {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
 }
 
 /* Game UI Styles */
@@ -56,4 +292,326 @@ canvas {
   flex: 1;
   background-color: #0f1419;
   border: 1px solid #0f3460;
+}
+
+/* Grid container */
+.grid {
+  display: grid;
+  gap: var(--space-md);
+}
+
+.grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Flex container */
+.flex {
+  display: flex;
+  gap: var(--space-md);
+}
+
+.flex-col {
+  flex-direction: column;
+}
+
+.flex-center {
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-between {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-end {
+  justify-content: flex-end;
+  align-items: flex-end;
+}
+
+/* Wrapper for content with padding */
+.wrapper {
+  padding: var(--space-lg);
+  overflow-y: auto;
+}
+
+/* Section spacing */
+.section {
+  padding: var(--space-xl);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+}
+
+.section:last-child {
+  border-bottom: none;
+}
+
+/* Content area */
+.content {
+  flex: 1;
+  overflow: auto;
+  padding: var(--space-lg);
+}
+
+/* Header styling */
+.header {
+  padding: var(--space-lg);
+  border-bottom: 2px solid rgba(0, 212, 255, 0.2);
+  background: linear-gradient(to right,
+    rgba(10, 10, 26, 0.9),
+    rgba(15, 15, 46, 0.6));
+}
+
+/* Footer styling */
+.footer {
+  padding: var(--space-md);
+  border-top: 1px solid rgba(0, 212, 255, 0.1);
+  background-color: rgba(10, 10, 26, 0.8);
+  font-size: 0.75rem;
+  color: var(--color-text-tertiary);
+}
+
+/* ============================================================================
+   6. UTILITY CLASSES
+   ============================================================================ */
+
+/* Display utilities */
+.hidden {
+  display: none;
+}
+
+.visible {
+  display: block;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+/* Text utilities */
+.text-primary {
+  color: var(--color-text-primary);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.text-tertiary {
+  color: var(--color-text-tertiary);
+}
+
+.text-accent-cyan {
+  color: var(--color-accent-cyan);
+}
+
+.text-accent-purple {
+  color: var(--color-accent-purple);
+}
+
+.text-accent-pink {
+  color: var(--color-accent-pink);
+}
+
+.text-accent-green {
+  color: var(--color-accent-green);
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-left {
+  text-align: left;
+}
+
+/* Spacing utilities */
+.m-0 { margin: 0; }
+.m-xs { margin: var(--space-xs); }
+.m-sm { margin: var(--space-sm); }
+.m-md { margin: var(--space-md); }
+.m-lg { margin: var(--space-lg); }
+.m-xl { margin: var(--space-xl); }
+.m-2xl { margin: var(--space-2xl); }
+
+.p-0 { padding: 0; }
+.p-xs { padding: var(--space-xs); }
+.p-sm { padding: var(--space-sm); }
+.p-md { padding: var(--space-md); }
+.p-lg { padding: var(--space-lg); }
+.p-xl { padding: var(--space-xl); }
+.p-2xl { padding: var(--space-2xl); }
+
+.mt-md { margin-top: var(--space-md); }
+.mb-md { margin-bottom: var(--space-md); }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+/* Background utilities */
+.bg-primary {
+  background-color: var(--color-bg-primary);
+}
+
+.bg-secondary {
+  background-color: var(--color-bg-secondary);
+}
+
+.bg-tertiary {
+  background-color: var(--color-bg-tertiary);
+}
+
+/* Border utilities */
+.border-cyan {
+  border-color: var(--color-accent-cyan);
+}
+
+.border-purple {
+  border-color: var(--color-accent-purple);
+}
+
+.border-pink {
+  border-color: var(--color-accent-pink);
+}
+
+/* Shadow utilities */
+.shadow-sm {
+  box-shadow: var(--shadow-sm);
+}
+
+.shadow-md {
+  box-shadow: var(--shadow-md);
+}
+
+.shadow-lg {
+  box-shadow: var(--shadow-lg);
+}
+
+.shadow-glass {
+  box-shadow: var(--shadow-glass);
+}
+
+/* Opacity utilities */
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.opacity-75 {
+  opacity: 0.75;
+}
+
+/* ============================================================================
+   7. RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 768px) {
+  :root {
+    font-size: 14px;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.25rem;
+  }
+
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .flex {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    font-size: 12px;
+  }
+
+  .p-lg {
+    padding: var(--space-md);
+  }
+
+  .m-lg {
+    margin: var(--space-md);
+  }
+}
+
+/* ============================================================================
+   8. ANIMATION & TRANSITIONS
+   ============================================================================ */
+
+@keyframes glow {
+  0%, 100% {
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+  }
+  50% {
+    text-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.glow-text {
+  animation: glow var(--transition-slow) infinite;
+}
+
+.pulse {
+  animation: pulse 2s var(--transition-base) infinite;
+}
+
+/* ============================================================================
+   9. SCROLLBAR STYLING
+   ============================================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 15, 46, 0.4);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.6);
 }
