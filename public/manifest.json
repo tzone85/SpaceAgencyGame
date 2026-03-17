@@ -1,0 +1,21 @@
+{
+  "name": "Stellar Command",
+  "short_name": "Stellar Command",
+  "description": "A space agency management game where players control a space agency, manage missions, and explore the cosmos",
+  "start_url": "/",
+  "display": "fullscreen",
+  "background_color": "#000000",
+  "theme_color": "#0f3460",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
