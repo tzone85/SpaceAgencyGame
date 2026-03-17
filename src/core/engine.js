@@ -7,6 +7,7 @@ import Renderer from "./renderer.js";
 import Camera from "./camera.js";
 import SceneManager from "../scenes/scene-manager.js";
 import SpaceScene from "../scenes/space-scene.js";
+import AudioManager from "../audio/AudioManager.js";
 
 class Engine {
   constructor() {
@@ -26,12 +27,15 @@ class Engine {
     // 3D components
     this.camera = null;
     this.sceneManager = null;
+
+    // Audio system
+    this.audioManager = null;
   }
 
   /**
-   * Initialize the engine - setup canvas, renderer, camera and scenes
+   * Initialize the engine - setup canvas, renderer, camera, scenes and audio
    */
-  initialize() {
+  async initialize() {
     if (this.isInitialized) {
       console.warn("Engine already initialized");
       return;
@@ -57,6 +61,10 @@ class Engine {
       
       // Setup resize handler
       this.setupResizeHandler();
+
+      // Initialize audio manager
+      this.audioManager = new AudioManager();
+      await this.audioManager.initialize();
 
       this.isInitialized = true;
       console.log("3D Game engine initialized successfully");
@@ -151,9 +159,9 @@ class Engine {
   }
 
   /**
-   * Start the main game loop
+   * Start the main game loop and audio
    */
-  start() {
+  async start() {
     if (!this.isInitialized) {
       console.error("Engine must be initialized before starting");
       return;
@@ -166,6 +174,20 @@ class Engine {
 
     console.log("Starting 3D game loop at 60 FPS...");
     console.log('Engine started');
+
+    // Start audio system (needs user interaction to resume context)
+    if (this.audioManager) {
+      try {
+        await this.audioManager.resumeContext();
+        this.audioManager.startAmbientMusic();
+      } catch (error) {
+        console.warn(
+          "Audio start failed (may require user interaction):",
+          error,
+        );
+      }
+    }
+
     this.isRunning = true;
     this.lastTime = performance.now();
     this.loop();
@@ -272,11 +294,21 @@ class Engine {
   }
 
   /**
-   * Stop the game loop
+   * Stop the game loop and audio
    */
   stop() {
     console.log('Engine stopped');
     this.isRunning = false;
+
+    // Stop audio
+    if (this.audioManager) {
+      this.audioManager.stopAmbientMusic();
+    }
+
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
   }
 
   /**
@@ -293,6 +325,7 @@ class Engine {
       canvasHeight: this.canvas ? this.canvas.height : 0,
       cameraState: this.camera ? this.camera.getState() : null,
       sceneManagerState: this.sceneManager ? this.sceneManager.getState() : null,
+      audioStats: this.audioManager ? this.audioManager.getStats() : null,
     };
   }
 
@@ -320,6 +353,11 @@ class Engine {
 
     // Clear camera reference
     this.camera = null;
+
+    if (this.audioManager) {
+      this.audioManager.destroy();
+      this.audioManager = null;
+    }
 
     // Destroy renderer
     if (this.renderer) {
