@@ -1,7 +1,7 @@
 export default {
   testEnvironment: "jsdom",
   transform: {
-    "^.+\\.js$": "babel-jest",
+    "^.+\\.jsx?$": ["babel-jest", { presets: ["@babel/preset-env"] }],
   },
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
