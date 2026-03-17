@@ -13,10 +13,14 @@ class Game {
     this.isRunning = false;
   }
 
-  start() {
-    console.log('Game started');
+  /**
+   * Start the game
+   */
+  async start() {
+    console.log("Starting Stellar Command...");
     this.isRunning = true;
-    this.engine.start();
+    await this.engine.initialize();
+    await this.engine.start();
   }
 
   stop() {
@@ -31,7 +35,17 @@ class Game {
     }
   }
 
-  render() {
+  /**
+   * Get the audio manager for controlling sound and music
+   */
+  getAudioManager() {
+    return this.engine.audioManager;
+  }
+
+  /**
+   * Destroy the game and cleanup resources
+   */
+  destroy() {
     if (this.isRunning) {
       this.renderer.render();
     }
