@@ -1,0 +1,768 @@
+/**
+ * UI Animations and Keyframes
+ *
+ * Provides consistent, smooth animations for UI elements including:
+ * - Loading states and spinners
+ * - Modal dialogs and overlays
+ * - Button transitions
+ * - Progress indicators
+ * - Toast notifications
+ * - Dropdown menus
+ */
+
+/* ============================================================================
+   KEYFRAME ANIMATIONS
+   ============================================================================ */
+
+/**
+ * Spinner rotation animation
+ * Creates a smooth continuous rotation for loading indicators
+ */
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/**
+ * Pulse animation
+ * Creates a pulsing opacity effect for loading states
+ */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/**
+ * Modal fade-in animation
+ * Smoothly fades in modal content
+ */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/**
+ * Modal fade-out animation
+ * Smoothly fades out modal content
+ */
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/**
+ * Modal slide up animation
+ * Slides dialog up while fading in
+ */
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/**
+ * Modal slide down animation
+ * Slides dialog down while fading out
+ */
+@keyframes slideDown {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/**
+ * Scale bounce animation
+ * Creates a subtle scale animation for emphasis
+ */
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/**
+ * Progress fill animation
+ * Smoothly animates progress bar width changes
+ */
+@keyframes progressFill {
+  0% {
+    width: 0%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/**
+ * Shimmer animation for loading skeletons
+ */
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/**
+ * Toast slide-in animation
+ * Slides toast in from the bottom
+ */
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/**
+ * Toast slide-out animation
+ * Slides toast out to the bottom
+ */
+@keyframes slideOutUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+/**
+ * Bounce animation
+ * Subtle bounce effect for interactive elements
+ */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+/* ============================================================================
+   UI BUTTON STYLES AND ANIMATIONS
+   ============================================================================ */
+
+.ui-button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.ui-button:hover:not(.ui-button--disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ui-button:active:not(.ui-button--disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ui-button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.3);
+  outline-offset: 2px;
+}
+
+/**
+ * Primary button variant
+ * Prominent CTA button with accent color
+ */
+.ui-button--primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.ui-button--primary:hover:not(.ui-button--disabled) {
+  background-color: #0056b3;
+}
+
+/**
+ * Secondary button variant
+ * Less prominent, alternative action
+ */
+.ui-button--secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.ui-button--secondary:hover:not(.ui-button--disabled) {
+  background-color: #5a6268;
+}
+
+/**
+ * Danger button variant
+ * For destructive actions
+ */
+.ui-button--danger {
+  background-color: #dc3545;
+  color: white;
+}
+
+.ui-button--danger:hover:not(.ui-button--disabled) {
+  background-color: #c82333;
+}
+
+/**
+ * Disabled button state
+ */
+.ui-button--disabled,
+.ui-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: #9ca3af;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ============================================================================
+   MODAL DIALOG STYLES AND ANIMATIONS
+   ============================================================================ */
+
+.ui-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  animation: fadeIn 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-modal-overlay.ui-modal-closing {
+  animation: fadeOut 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.ui-modal-dialog {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+  max-width: 500px;
+  width: 90%;
+  animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.ui-modal-overlay.ui-modal-closing .ui-modal-dialog {
+  animation: slideDown 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.ui-modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.ui-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-modal-close:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.ui-modal-body {
+  padding: 20px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.ui-modal-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.ui-modal-footer .ui-button {
+  margin: 0;
+}
+
+/* ============================================================================
+   SPINNER / LOADING INDICATOR STYLES AND ANIMATIONS
+   ============================================================================ */
+
+.ui-spinner {
+  display: inline-block;
+}
+
+.ui-spinner--small {
+  width: 20px;
+  height: 20px;
+}
+
+.ui-spinner--medium {
+  width: 40px;
+  height: 40px;
+}
+
+.ui-spinner--large {
+  width: 60px;
+  height: 60px;
+}
+
+.ui-spinner-circle {
+  width: 100%;
+  height: 100%;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-top-color: #007bff;
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+/* ============================================================================
+   PROGRESS BAR STYLES AND ANIMATIONS
+   ============================================================================ */
+
+.ui-progress-container {
+  width: 100%;
+}
+
+.ui-progress-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ui-progress-bar {
+  width: 100%;
+  height: 24px;
+  background-color: #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.ui-progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #007bff 0%,
+    #0056b3 100%
+  );
+  transition: width 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.ui-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  animation: shimmer 2000ms infinite;
+}
+
+.ui-progress-percentage {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+/* ============================================================================
+   TOAST NOTIFICATION STYLES AND ANIMATIONS
+   ============================================================================ */
+
+.ui-toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.ui-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 300px;
+  max-width: 500px;
+  pointer-events: auto;
+  animation: slideInUp 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(10px);
+  opacity: 0;
+}
+
+.ui-toast.ui-toast-visible {
+  animation: slideInUp 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.ui-toast.ui-toast-visible.ui-toast-closing {
+  animation: slideOutUp 300ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.ui-toast-content {
+  flex: 1;
+  font-size: 14px;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+.ui-toast-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-toast-close:hover {
+  color: #1f2937;
+}
+
+/**
+ * Info toast variant
+ */
+.ui-toast--info {
+  border-left: 4px solid #0ea5e9;
+  background-color: #f0f9ff;
+}
+
+.ui-toast--info .ui-toast-content {
+  color: #0c4a6e;
+}
+
+/**
+ * Success toast variant
+ */
+.ui-toast--success {
+  border-left: 4px solid #10b981;
+  background-color: #f0fdf4;
+}
+
+.ui-toast--success .ui-toast-content {
+  color: #065f46;
+}
+
+/**
+ * Warning toast variant
+ */
+.ui-toast--warning {
+  border-left: 4px solid #f59e0b;
+  background-color: #fffbeb;
+}
+
+.ui-toast--warning .ui-toast-content {
+  color: #78350f;
+}
+
+/**
+ * Error toast variant
+ */
+.ui-toast--error {
+  border-left: 4px solid #ef4444;
+  background-color: #fef2f2;
+}
+
+.ui-toast--error .ui-toast-content {
+  color: #7f1d1d;
+}
+
+/* ============================================================================
+   DROPDOWN MENU STYLES AND ANIMATIONS
+   ============================================================================ */
+
+.ui-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.ui-dropdown-toggle {
+  padding: 10px 16px;
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-dropdown-toggle:hover {
+  background-color: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+.ui-dropdown-toggle::after {
+  content: '▼';
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 10px;
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-dropdown-open .ui-dropdown-toggle::after {
+  transform: rotate(180deg);
+}
+
+.ui-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  list-style: none;
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  margin: 4px 0 0 0;
+  padding: 4px 0;
+  min-width: 200px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+}
+
+.ui-dropdown-open .ui-dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.ui-dropdown-item {
+  margin: 0;
+  padding: 0;
+}
+
+.ui-dropdown-link {
+  display: block;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-dropdown-link:hover {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+/* ============================================================================
+   BADGE / TAG STYLES
+   ============================================================================ */
+
+.ui-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-badge--default {
+  background-color: #e5e7eb;
+  color: #4b5563;
+}
+
+.ui-badge--success {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.ui-badge--warning {
+  background-color: #fed7aa;
+  color: #92400e;
+}
+
+.ui-badge--error {
+  background-color: #fee2e2;
+  color: #7f1d1d;
+}
+
+/* ============================================================================
+   PANEL / CARD STYLES
+   ============================================================================ */
+
+.ui-panel {
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ui-panel:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.ui-panel-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+  font-weight: 600;
+  color: #1f2937;
+  font-size: 14px;
+}
+
+.ui-panel-body {
+  padding: 20px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+.ui-panel--default {
+  border-color: #e5e7eb;
+}
+
+.ui-panel--primary {
+  border-color: #007bff;
+  border-left-width: 4px;
+}
+
+.ui-panel--success {
+  border-color: #10b981;
+  border-left-width: 4px;
+}
+
+.ui-panel--warning {
+  border-color: #f59e0b;
+  border-left-width: 4px;
+}
+
+.ui-panel--error {
+  border-color: #ef4444;
+  border-left-width: 4px;
+}
+
+/* ============================================================================
+   UTILITY CLASSES FOR ANIMATION CONTROL
+   ============================================================================ */
+
+/**
+ * Disable animations for accessibility
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/**
+ * Common animation timing classes
+ */
+.animate-fast {
+  animation-duration: 200ms;
+  transition-duration: 200ms;
+}
+
+.animate-normal {
+  animation-duration: 300ms;
+  transition-duration: 300ms;
+}
+
+.animate-slow {
+  animation-duration: 500ms;
+  transition-duration: 500ms;
+}
