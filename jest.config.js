@@ -14,8 +14,16 @@ export default {
     "!src/**/*.test.js",
     "!node_modules/**",
   ],
-  collectCoverage: false,
+  collectCoverage: true,
   coveragePathIgnorePatterns: ['/node_modules/', '/tests/'],
+  coverageThreshold: {
+    global: {
+      statements: 80,
+      branches: 80,
+      functions: 80,
+      lines: 80,
+    },
+  },
   globals: {
     jest: true,
   },
