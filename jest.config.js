@@ -27,4 +27,5 @@ export default {
   globals: {
     jest: true,
   },
+  extensionsToTreatAsEsm: [],
 };
