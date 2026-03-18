@@ -164,9 +164,9 @@ Systems (communicate only via EventBus)
 | # | Story | Owned Files |
 |---|-------|------------|
 | 5 | Budget system | `src/systems/BudgetSystem.js`, `src/data/budget.js` |
-| 6 | Mission system | `src/systems/MissionSystem.js`, `src/data/missions.js` |
-| 7 | Crew system | `src/systems/CrewSystem.js`, `src/data/crew.js` |
-| 8 | Research system | `src/systems/ResearchSystem.js`, `src/data/research.js` |
+| 6 | Mission system (enhance existing data) | `src/systems/MissionSystem.js`, `src/data/missions.js` |
+| 7 | Crew system (enhance existing data) | `src/systems/CrewSystem.js`, `src/data/crew.js` |
+| 8 | Research system (enhance existing data) | `src/systems/ResearchSystem.js`, `src/data/research.js` |
 | 9 | Random event system | `src/systems/EventSystem.js`, `src/data/events.js` |
 
 ### Wave 2 — Scenes (parallel, 5 agents)
@@ -192,7 +192,7 @@ Systems (communicate only via EventBus)
 
 | # | Story | Owned Files |
 |---|-------|------------|
-| 19 | Save/load integration | `src/game/SaveSystem.js` |
+| 19 | Save/load integration and end-to-end wiring | `src/game/SaveSystem.js` (enhance from Wave 0), `src/core/game.js` |
 | 20 | Vercel deployment config | `vercel.json`, build scripts |
 | 21 | End-to-end smoke test | `tests/e2e/` |
 
@@ -201,6 +201,15 @@ Systems (communicate only via EventBus)
 - Parallel stories must have zero file ownership overlap
 - Each story includes explicit owned file paths — agents must not modify files outside ownership
 - Systems communicate only via EventBus — no direct imports between systems
+- **Read-only access**: all stories may import (but not modify) `src/ui/components.js`, `src/utils/constants.js`, `src/utils/helpers.js`, and `src/game/EventBus.js` — these are shared libraries
+- Wave 4 story 19 enhances `SaveSystem.js` created in Wave 0 story 3 — this is intentional (sequential wave, no conflict)
+
+### Error handling
+- **localStorage full**: SaveSystem catches QuotaExceededError, emits `save:error` event, UI shows warning toast
+- **Invalid crew assignment**: MissionSystem validates crew IDs against roster before launch, emits `mission:validation-error`
+- **Insufficient budget**: BudgetSystem rejects deductions that would go negative, emits `budget:insufficient`
+- **Missing game state**: SaveSystem falls back to default initial state if localStorage is corrupted or empty
+- **Scene navigation errors**: SceneManager catches missing scenes and falls back to Dashboard
 
 ---
 
