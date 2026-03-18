@@ -23,9 +23,23 @@ import EVENTS from "../data/events.js";
 
 export class EventSystem {
   constructor(eventBus, eventData = {}, initialState = {}) {
-    this.eventBus = eventBus;
-    this.eventData = eventData;
-    this.gameState = arguments[0] && arguments[0].getState ? arguments[0] : null;
+    // Support both new architecture (eventBus, gameState) and legacy (gameState, eventData)
+    if (eventBus && typeof eventBus.getState === "function") {
+      // First argument is GameState, fetch EventBus from singleton
+      this.gameState = eventBus;
+      this.eventBus = EventBus.getInstance();
+      this.eventData = eventData;
+    } else {
+      // First argument is EventBus (normal case)
+      this.eventBus = eventBus;
+      this.gameState =
+        eventData && typeof eventData.getState === "function"
+          ? eventData
+          : null;
+      this.eventData =
+        eventData && typeof eventData.getState !== "function" ? eventData : {};
+    }
+
     this.state = {
       active: initialState.active ?? [],
       history: initialState.history ?? [],
@@ -87,7 +101,12 @@ export class EventSystem {
     }
 
     // Check if there are active events in game state
-    if (this.gameState && gameState.events && gameState.events.active && gameState.events.active.length > 0) {
+    if (
+      this.gameState &&
+      gameState.events &&
+      gameState.events.active &&
+      gameState.events.active.length > 0
+    ) {
       return null; // Events already pending
     }
 
@@ -107,16 +126,18 @@ export class EventSystem {
         try {
           return event.condition(gameState);
         } catch (error) {
-          console.error(`Error checking condition for event "${event.id}":`, error);
+          console.error(
+            `Error checking condition for event "${event.id}":`,
+            error,
+          );
           return false;
         }
       });
 
       if (triggeredEvents.length > 0) {
         // Randomly select one event
-        const selectedEvent = triggeredEvents[
-          Math.floor(Math.random() * triggeredEvents.length)
-        ];
+        const selectedEvent =
+          triggeredEvents[Math.floor(Math.random() * triggeredEvents.length)];
         return selectedEvent;
       }
     }
@@ -194,7 +215,7 @@ export class EventSystem {
       const choice = event.choices[choiceIndex];
       if (!choice) {
         console.error(
-          `Choice index ${choiceIndex} not found for event "${eventId}"`
+          `Choice index ${choiceIndex} not found for event "${eventId}"`,
         );
         return;
       }
@@ -203,8 +224,12 @@ export class EventSystem {
 
       // Apply consequences to game state
       const updates = {};
-      if (choice.consequences.budget !== undefined && choice.consequences.budget !== 0) {
-        const newBalance = currentState.budget.balance + choice.consequences.budget;
+      if (
+        choice.consequences.budget !== undefined &&
+        choice.consequences.budget !== 0
+      ) {
+        const newBalance =
+          currentState.budget.balance + choice.consequences.budget;
         updates["budget.balance"] = Math.max(0, newBalance); // Prevent negative balance
       }
 
@@ -216,8 +241,8 @@ export class EventSystem {
           0,
           Math.min(
             100,
-            currentState.agency.reputation + choice.consequences.reputation
-          )
+            currentState.agency.reputation + choice.consequences.reputation,
+          ),
         );
         updates["agency.reputation"] = newReputation;
       }
@@ -235,7 +260,7 @@ export class EventSystem {
 
       // Remove from active events
       const activeEvents = currentState.events.active.filter(
-        (e) => e.id !== eventId
+        (e) => e.id !== eventId,
       );
       updates["events.active"] = activeEvents;
 
