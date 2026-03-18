@@ -5,6 +5,7 @@ export default {
   testMatch: ["**/tests/**/*.test.js"],
   testPathIgnorePatterns: ["/node_modules/", "/dist/"],
   setupFiles: ["<rootDir>/tests/setup-globals.js"],
+  setupFilesAfterEnv: ["<rootDir>/tests/setup-test-env.js"],
   collectCoverageFrom: ["src/**/*.js", "!src/**/*.test.js", "!node_modules/**"],
   collectCoverage: true,
   coveragePathIgnorePatterns: ["/node_modules/", "/tests/"],
