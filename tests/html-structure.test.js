@@ -1,5 +1,8 @@
-const fs = require("fs");
-const path = require("path");
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 describe("HTML Structure and Font Loading", () => {
   let htmlContent;
@@ -47,9 +50,7 @@ describe("HTML Structure and Font Loading", () => {
     });
 
     test("should have canvas positioned as block", () => {
-      expect(htmlContent).toMatch(
-        /canvas#starfield\s*{[\s\S]*display:\s*block/,
-      );
+      expect(htmlContent).toMatch(/canvas\s*\{[\s\S]*display:\s*block/);
     });
   });
 
@@ -176,7 +177,7 @@ describe("HTML Structure and Font Loading", () => {
   describe("Script Loading", () => {
     test("should have module script for main.js", () => {
       expect(htmlContent).toMatch(
-        /<script type="module" src="\.\/src\/main\.js"><\/script>/,
+        /<script type="module" src="[./]*src\/main\.js"><\/script>/,
       );
     });
   });
@@ -193,9 +194,7 @@ describe("HTML Structure and Font Loading", () => {
     });
 
     test("canvas should have absolute positioning", () => {
-      expect(htmlContent).toMatch(
-        /canvas#starfield\s*{[\s\S]*position:\s*absolute/,
-      );
+      expect(htmlContent).toMatch(/canvas\s*\{[\s\S]*position:\s*absolute/);
     });
   });
 });

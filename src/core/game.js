@@ -3,15 +3,12 @@
  * Manages the overall game state and lifecycle
  */
 
-import { Engine } from './engine.js';
-import { Renderer } from './renderer.js';
 import Engine from "./engine.js";
 import MainMenu from "../scenes/MainMenu.js";
 
 class Game {
   constructor() {
     this.engine = new Engine();
-    this.renderer = new Renderer();
     this.isRunning = false;
   }
 
@@ -40,7 +37,7 @@ class Game {
    * Stop the game
    */
   stop() {
-    console.log('Game stopped');
+    console.log("Game stopped");
     this.isRunning = false;
     this.engine.stop();
   }
@@ -62,9 +59,8 @@ class Game {
    * Destroy the game and cleanup resources
    */
   destroy() {
-    if (this.isRunning) {
-      this.renderer.render();
-    }
+    this.stop();
+    this.engine.destroy();
   }
 }
 
