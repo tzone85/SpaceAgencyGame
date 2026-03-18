@@ -1,9 +1,13 @@
 /**
  * Scenes Module
- * 
+ *
  * Placeholder for scene management.
  * This module will handle different game scenes like menu, gameplay, etc.
  */
+
+import MainMenu from "./MainMenu.js";
+import CrewQuarters from "./CrewQuarters.js";
+import LaunchSequence from "./LaunchSequence.js";
 
 export const SceneManager = class {
   constructor() {
@@ -21,12 +25,13 @@ export const SceneManager = class {
   }
 
   initialize() {
-    console.log('Scene Manager initialized');
+    console.log("Scene Manager initialized");
   }
 
   destroy() {
-    console.log('Scene Manager destroyed');
+    console.log("Scene Manager destroyed");
   }
 };
 
+export { MainMenu, CrewQuarters, LaunchSequence };
 export default SceneManager;

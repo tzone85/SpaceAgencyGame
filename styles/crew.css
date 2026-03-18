@@ -1,5 +1,528 @@
-/* Crew Quarters Scene Styles */
+/* ============================================================================
+   Crew Quarters Scene - Glassmorphism UI
+   Crew management interface with cards, skill bars, and status indicators
+   ============================================================================ */
+
+/* ============================================================================
+   1. CREW QUARTERS MAIN CONTAINER
+   ============================================================================ */
 
 .crew-quarters {
-  /* Crew quarters specific styles */
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-secondary) 100%);
+  padding: var(--space-2xl);
+  gap: var(--space-xl);
+  overflow: hidden;
+}
+
+.crew-quarters__header {
+  text-align: center;
+  margin-bottom: var(--space-lg);
+}
+
+.crew-quarters__title {
+  font-family: var(--font-game);
+  font-size: 2rem;
+  color: var(--color-accent-cyan);
+  text-shadow: 0 0 10px var(--color-accent-cyan), 0 0 20px rgba(0, 212, 255, 0.5);
+  letter-spacing: 0.15em;
+  margin: 0;
+}
+
+/* ============================================================================
+   2. TAB NAVIGATION
+   ============================================================================ */
+
+.crew-quarters__tabs {
+  display: flex;
+  gap: var(--space-md);
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: var(--space-lg);
+  background: rgba(15, 15, 46, 0.4);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(0, 212, 255, 0.15);
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.crew-quarters__tab {
+  padding: var(--space-sm) var(--space-lg);
+  background: transparent;
+  border: 2px solid rgba(0, 212, 255, 0.3);
+  color: var(--color-text-secondary);
+  font-family: var(--font-data);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-base);
+  letter-spacing: 0.05em;
+}
+
+.crew-quarters__tab:hover {
+  border-color: var(--color-accent-cyan);
+  color: var(--color-accent-cyan);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+}
+
+.crew-quarters__tab--active {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(217, 70, 239, 0.2));
+  border-color: var(--color-accent-cyan);
+  color: var(--color-accent-cyan);
+  box-shadow: inset 0 0 10px rgba(0, 212, 255, 0.1), 0 0 20px rgba(0, 212, 255, 0.15);
+}
+
+/* ============================================================================
+   3. GRID CONTAINER
+   ============================================================================ */
+
+.crew-quarters__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-lg);
+  overflow-y: auto;
+  padding: var(--space-lg);
+  flex: 1;
+}
+
+.crew-quarters__grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.crew-quarters__grid::-webkit-scrollbar-track {
+  background: rgba(15, 15, 46, 0.4);
+  border-radius: var(--radius-md);
+}
+
+.crew-quarters__grid::-webkit-scrollbar-thumb {
+  background: rgba(0, 212, 255, 0.3);
+  border-radius: var(--radius-md);
+}
+
+.crew-quarters__grid::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.5);
+}
+
+.crew-quarters__empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: var(--space-2xl);
+  color: var(--color-text-secondary);
+  font-size: 1.125rem;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================================================
+   4. CREW CARD
+   ============================================================================ */
+
+.crew-card {
+  background: var(--color-glass-bg);
+  border: 1px solid var(--color-glass-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+  backdrop-filter: blur(var(--glass-blur));
+  box-shadow: var(--shadow-glass);
+  transition: all var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.crew-card:hover {
+  background: rgba(15, 15, 46, 0.8);
+  border-color: rgba(0, 212, 255, 0.4);
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.2), inset 0 0 20px rgba(0, 212, 255, 0.05);
+  transform: translateY(-4px);
+}
+
+/* Card header */
+.crew-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-md);
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.crew-card__name-section {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex: 1;
+}
+
+.crew-card__name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: 0.02em;
+}
+
+.crew-card__role-icon {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.crew-card__role-icon--pilot {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(0, 212, 255, 0.1));
+  border: 1px solid var(--color-accent-cyan);
+  color: var(--color-accent-cyan);
+}
+
+.crew-card__role-icon--engineer {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.1));
+  border: 1px solid var(--color-accent-green);
+  color: var(--color-accent-green);
+}
+
+.crew-card__role-icon--scientist {
+  background: linear-gradient(135deg, rgba(217, 70, 239, 0.3), rgba(217, 70, 239, 0.1));
+  border: 1px solid var(--color-accent-purple);
+  color: var(--color-accent-purple);
+}
+
+.crew-card__role-icon--medical_officer {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.3), rgba(236, 72, 153, 0.1));
+  border: 1px solid var(--color-accent-pink);
+  color: var(--color-accent-pink);
+}
+
+.crew-card__role-icon--mission_specialist {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(59, 130, 246, 0.1));
+  border: 1px solid var(--color-accent-blue);
+  color: var(--color-accent-blue);
+}
+
+/* Status badge */
+.crew-card__status {
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.crew-card__status--available {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+  border: 1px solid var(--color-success);
+  color: var(--color-success);
+}
+
+.crew-card__status--assigned {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.1));
+  border: 1px solid var(--color-info);
+  color: var(--color-info);
+}
+
+.crew-card__status--training {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.1));
+  border: 1px solid var(--color-warning);
+  color: var(--color-warning);
+}
+
+/* ============================================================================
+   5. SKILL BARS
+   ============================================================================ */
+
+.crew-card__skills {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.crew-card__skill-bar {
+  display: grid;
+  grid-template-columns: 70px 1fr 30px;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-xs) 0;
+}
+
+.crew-card__skill-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: capitalize;
+}
+
+.crew-card__skill-bar-wrapper {
+  height: 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 212, 255, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.crew-card__skill-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-base);
+  position: relative;
+}
+
+.crew-card__skill-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+  border-radius: var(--radius-sm);
+}
+
+.crew-card__skill-bar-fill--piloting {
+  background: linear-gradient(90deg, var(--color-accent-cyan), rgba(0, 212, 255, 0.5));
+  box-shadow: 0 0 8px rgba(0, 212, 255, 0.4);
+}
+
+.crew-card__skill-bar-fill--engineering {
+  background: linear-gradient(90deg, var(--color-accent-green), rgba(16, 185, 129, 0.5));
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+}
+
+.crew-card__skill-bar-fill--science {
+  background: linear-gradient(90deg, var(--color-accent-purple), rgba(217, 70, 239, 0.5));
+  box-shadow: 0 0 8px rgba(217, 70, 239, 0.4);
+}
+
+.crew-card__skill-bar-fill--medical {
+  background: linear-gradient(90deg, var(--color-accent-pink), rgba(236, 72, 153, 0.5));
+  box-shadow: 0 0 8px rgba(236, 72, 153, 0.4);
+}
+
+.crew-card__skill-value {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 700;
+  text-align: right;
+}
+
+/* ============================================================================
+   6. STATS DISPLAY
+   ============================================================================ */
+
+.crew-card__stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding: var(--space-md) 0;
+  border-top: 1px solid rgba(0, 212, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.crew-card__stat {
+  display: grid;
+  grid-template-columns: 70px 1fr 30px;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.crew-card__stat-label {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.crew-card__stat-bar {
+  height: 8px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(0, 212, 255, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+.crew-card__stat-fill {
+  height: 100%;
+  border-radius: var(--radius-sm);
+  transition: width var(--transition-base);
+  position: relative;
+}
+
+.crew-card__stat-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3));
+  border-radius: var(--radius-sm);
+}
+
+.crew-card__stat-fill--morale {
+  background: linear-gradient(90deg, var(--color-accent-purple), rgba(217, 70, 239, 0.5));
+  box-shadow: 0 0 10px rgba(217, 70, 239, 0.4);
+}
+
+.crew-card__stat-fill--health {
+  background: linear-gradient(90deg, var(--color-accent-green), rgba(16, 185, 129, 0.5));
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.crew-card__stat-value {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  font-weight: 700;
+  text-align: right;
+}
+
+/* ============================================================================
+   7. ACTION BUTTONS
+   ============================================================================ */
+
+.crew-card__actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding-top: var(--space-md);
+  border-top: 1px solid rgba(0, 212, 255, 0.15);
+}
+
+.crew-card__action-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: var(--space-sm) var(--space-md);
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(0, 212, 255, 0.05));
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: var(--color-accent-cyan);
+  font-family: var(--font-data);
+  font-size: 0.7rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  letter-spacing: 0.05em;
+  transition: all var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.crew-card__action-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.6s;
+}
+
+.crew-card__action-btn:hover {
+  border-color: var(--color-accent-cyan);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.3), inset 0 0 10px rgba(0, 212, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.crew-card__action-btn:hover::before {
+  left: 100%;
+}
+
+.crew-card__action-btn--recruit {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+  border-color: rgba(16, 185, 129, 0.3);
+  color: var(--color-success);
+}
+
+.crew-card__action-btn--recruit:hover {
+  border-color: var(--color-success);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.3), inset 0 0 10px rgba(16, 185, 129, 0.1);
+}
+
+.crew-card__action-btn--train {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+  border-color: rgba(245, 158, 11, 0.3);
+  color: var(--color-warning);
+}
+
+.crew-card__action-btn--train:hover {
+  border-color: var(--color-warning);
+  box-shadow: 0 0 15px rgba(245, 158, 11, 0.3), inset 0 0 10px rgba(245, 158, 11, 0.1);
+}
+
+.crew-card__action-btn--assign {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(59, 130, 246, 0.05));
+  border-color: rgba(59, 130, 246, 0.3);
+  color: var(--color-info);
+}
+
+.crew-card__action-btn--assign:hover {
+  border-color: var(--color-info);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.3), inset 0 0 10px rgba(59, 130, 246, 0.1);
+}
+
+/* ============================================================================
+   8. RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 1024px) {
+  .crew-quarters {
+    padding: var(--space-xl);
+  }
+
+  .crew-quarters__grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+
+  .crew-quarters__title {
+    font-size: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .crew-quarters {
+    padding: var(--space-lg);
+  }
+
+  .crew-quarters__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-md);
+  }
+
+  .crew-quarters__tabs {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .crew-quarters__tab {
+    width: 100%;
+  }
+
+  .crew-card__actions {
+    flex-direction: column;
+  }
+
+  .crew-card__action-btn {
+    width: 100%;
+  }
+
+  .crew-card__skill-bar,
+  .crew-card__stat {
+    grid-template-columns: 1fr;
+    gap: var(--space-xs);
+  }
+
+  .crew-card__skill-label,
+  .crew-card__stat-label {
+    display: flex;
+    justify-content: space-between;
+  }
 }
