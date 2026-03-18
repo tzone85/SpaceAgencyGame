@@ -4,7 +4,7 @@
  */
 
 import Camera from "./camera.js";
-import SceneManager from "../scenes/scene-manager.js";
+import SceneManager from "../managers/SceneManager.js";
 import SpaceScene from "../scenes/space-scene.js";
 import AudioManager from "../audio/AudioManager.js";
 

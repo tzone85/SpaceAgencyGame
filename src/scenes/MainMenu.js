@@ -24,7 +24,7 @@ class MainMenu {
   initialize() {
     this.createMenuUI();
     this.attachEventListeners();
-    console.log('MainMenu scene initialized');
+    console.log("MainMenu scene initialized");
   }
 
   /**
@@ -32,31 +32,31 @@ class MainMenu {
    */
   createMenuUI() {
     // Create main menu container
-    this.menuElement = document.createElement('div');
-    this.menuElement.id = 'mainMenu';
-    this.menuElement.className = 'main-menu';
+    this.menuElement = document.createElement("div");
+    this.menuElement.id = "mainMenu";
+    this.menuElement.className = "main-menu";
 
     // Create title
-    this.titleElement = document.createElement('h1');
-    this.titleElement.className = 'game-title';
-    this.titleElement.textContent = 'STELLAR COMMAND';
+    this.titleElement = document.createElement("h1");
+    this.titleElement.className = "game-title";
+    this.titleElement.textContent = "STELLAR COMMAND";
     this.menuElement.appendChild(this.titleElement);
 
     // Create buttons container
-    this.buttonsContainer = document.createElement('div');
-    this.buttonsContainer.className = 'menu-buttons';
+    this.buttonsContainer = document.createElement("div");
+    this.buttonsContainer.className = "menu-buttons";
 
     // Create buttons
     const buttonConfigs = [
-      { id: 'newGameBtn', label: 'NEW GAME', action: 'newGame' },
-      { id: 'continueBtn', label: 'CONTINUE GAME', action: 'continueGame' },
-      { id: 'settingsBtn', label: 'SETTINGS', action: 'settings' },
+      { id: "newGameBtn", label: "NEW GAME", action: "newGame" },
+      { id: "continueBtn", label: "CONTINUE GAME", action: "continueGame" },
+      { id: "settingsBtn", label: "SETTINGS", action: "settings" },
     ];
 
     buttonConfigs.forEach((config) => {
-      const button = document.createElement('button');
+      const button = document.createElement("button");
       button.id = config.id;
-      button.className = 'menu-button';
+      button.className = "menu-button";
       button.textContent = config.label;
       button.dataset.action = config.action;
       this.buttonsContainer.appendChild(button);
@@ -66,7 +66,7 @@ class MainMenu {
     this.menuElement.appendChild(this.buttonsContainer);
 
     // Append to body if not already in DOM
-    if (!document.getElementById('mainMenu')) {
+    if (!document.getElementById("mainMenu")) {
       document.body.appendChild(this.menuElement);
     }
   }
@@ -76,7 +76,7 @@ class MainMenu {
    */
   attachEventListeners() {
     this.buttons.forEach((button) => {
-      button.addEventListener('click', (e) => {
+      button.addEventListener("click", (e) => {
         this.handleButtonClick(e);
       });
     });
@@ -90,23 +90,23 @@ class MainMenu {
     const action = event.target.dataset.action;
 
     switch (action) {
-      case 'newGame':
-        if (typeof this.onNewGame === 'function') {
+      case "newGame":
+        if (typeof this.onNewGame === "function") {
           this.onNewGame();
         }
-        console.log('New Game clicked');
+        console.log("New Game clicked");
         break;
-      case 'continueGame':
-        if (typeof this.onContinueGame === 'function') {
+      case "continueGame":
+        if (typeof this.onContinueGame === "function") {
           this.onContinueGame();
         }
-        console.log('Continue Game clicked');
+        console.log("Continue Game clicked");
         break;
-      case 'settings':
-        if (typeof this.onSettings === 'function') {
+      case "settings":
+        if (typeof this.onSettings === "function") {
           this.onSettings();
         }
-        console.log('Settings clicked');
+        console.log("Settings clicked");
         break;
     }
   }
@@ -134,7 +134,7 @@ class MainMenu {
   cleanup() {
     // Remove event listeners
     this.buttons.forEach((button) => {
-      button.removeEventListener('click', null);
+      button.removeEventListener("click", null);
     });
 
     // Remove menu from DOM
@@ -147,7 +147,10 @@ class MainMenu {
     this.titleElement = null;
     this.buttonsContainer = null;
     this.buttons = [];
-    console.log('MainMenu scene cleaned up');
+    this.onNewGame = undefined;
+    this.onContinueGame = undefined;
+    this.onSettings = undefined;
+    console.log("MainMenu scene cleaned up");
   }
 
   /**

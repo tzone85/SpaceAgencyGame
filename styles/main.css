@@ -92,7 +92,7 @@ html {
 body {
   margin: 0;
   padding: 0;
-  background-color: #0a0e27;
+  background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   font-family: var(--font-data);
   line-height: 1.5;
