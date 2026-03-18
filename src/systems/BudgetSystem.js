@@ -99,7 +99,11 @@ export class BudgetSystem {
     const currentBalance = currentState?.budget?.balance ?? this.state.balance;
 
     // Check if sufficient funds
-    if (currentBalance < amount || (BUDGET_CONSTRAINTS && currentBalance - amount < BUDGET_CONSTRAINTS.minBalance)) {
+    if (
+      currentBalance < amount ||
+      (BUDGET_CONSTRAINTS &&
+        currentBalance - amount < BUDGET_CONSTRAINTS.minBalance)
+    ) {
       if (this.#eventBus) {
         this.#eventBus.emit("budget:insufficient", {
           required: amount,
@@ -108,7 +112,7 @@ export class BudgetSystem {
         });
       }
       if (this.eventBus) {
-        this.eventBus.emit?.('budget:insufficient', {
+        this.eventBus.emit?.("budget:insufficient", {
           required: amount,
           available: currentBalance,
         });
@@ -139,7 +143,7 @@ export class BudgetSystem {
       });
     }
     if (this.eventBus) {
-      this.eventBus.emit?.('budget:updated', { balance: newBalance });
+      this.eventBus.emit?.("budget:updated", { balance: newBalance });
     }
 
     return true;
@@ -194,7 +198,7 @@ export class BudgetSystem {
       });
     }
     if (this.eventBus) {
-      this.eventBus.emit?.('budget:updated', {
+      this.eventBus.emit?.("budget:updated", {
         balance: newBalance,
         source,
       });
@@ -207,8 +211,10 @@ export class BudgetSystem {
   advanceQuarter() {
     const currentState = this.#gameState?.getState?.();
     const currentBalance = currentState?.budget?.balance ?? this.state.balance;
-    const currentQuarter = currentState?.budget?.currentQuarter ?? this.state.currentQuarter;
-    const currentYear = currentState?.budget?.currentYear ?? this.state.currentYear;
+    const currentQuarter =
+      currentState?.budget?.currentQuarter ?? this.state.currentQuarter;
+    const currentYear =
+      currentState?.budget?.currentYear ?? this.state.currentYear;
 
     // Calculate income and expenses if available
     let quarterlyIncome, quarterlyExpenses, netChange;
@@ -227,7 +233,7 @@ export class BudgetSystem {
     if (BUDGET_CONSTRAINTS) {
       newBalance = Math.max(
         BUDGET_CONSTRAINTS.minBalance,
-        Math.min(BUDGET_CONSTRAINTS.maxBalance, newBalance)
+        Math.min(BUDGET_CONSTRAINTS.maxBalance, newBalance),
       );
     }
 
@@ -247,7 +253,7 @@ export class BudgetSystem {
         "budget.currentYear": newYear,
       });
     } else {
-      this.addIncome(this.state.quarterlyFunding, 'quarterly-funding');
+      this.addIncome(this.state.quarterlyFunding, "quarterly-funding");
       this.state.currentQuarter = newQuarter;
       this.state.currentYear = newYear;
     }
@@ -256,7 +262,7 @@ export class BudgetSystem {
     this._addToHistory(
       `Q${currentQuarter} ${currentYear}`,
       netChange,
-      "quarterly_settlement"
+      "quarterly_settlement",
     );
 
     // Emit events
@@ -280,7 +286,7 @@ export class BudgetSystem {
       });
     }
     if (this.eventBus) {
-      this.eventBus.emit?.('budget:quarter-advanced', {
+      this.eventBus.emit?.("budget:quarter-advanced", {
         quarter: newQuarter,
         year: newYear,
       });
@@ -327,7 +333,11 @@ export class BudgetSystem {
       report.quarterlyExpenses = totalExpenses;
       report.quarterlyNetChange = totalIncome - totalExpenses;
       report.percentageSpent = ((totalExpenses / totalIncome) * 100).toFixed(2);
-      report.status = isCritical ? "critical" : isWarning ? "warning" : "healthy";
+      report.status = isCritical
+        ? "critical"
+        : isWarning
+          ? "warning"
+          : "healthy";
     }
 
     if (BUDGET_CONSTRAINTS) {
@@ -345,7 +355,7 @@ export class BudgetSystem {
           };
           return acc;
         },
-        {}
+        {},
       );
     }
 
@@ -359,7 +369,7 @@ export class BudgetSystem {
           };
           return acc;
         },
-        {}
+        {},
       );
     }
 
@@ -420,4 +430,3 @@ export class BudgetSystem {
 }
 
 export default BudgetSystem;
-export { BudgetSystem };
