@@ -307,8 +307,8 @@ small {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 50%, #0f1428 100%);
-  z-index: 1000;
+  background: linear-gradient(135deg, rgba(10, 14, 39, 0.3) 0%, rgba(26, 31, 58, 0.3) 50%, rgba(15, 20, 40, 0.3) 100%);
+  z-index: 10;
 }
 
 /* Grid container */
@@ -399,6 +399,17 @@ small {
    6. MAIN MENU SPECIFIC STYLES
    ============================================================================ */
 
+/* Starfield canvas background for main menu */
+.mainmenu-starfield {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  background-color: #000000;
+}
+
 /* Animated game title */
 .game-title {
   font-size: 4rem;
@@ -410,6 +421,8 @@ small {
   text-shadow: 0 0 10px #00ffff, 0 0 20px #0088ff;
   animation: titlePulse 2s ease-in-out infinite;
   animation-delay: 0.5s;
+  position: relative;
+  z-index: 10;
 }
 
 /* Title pulse animation */
@@ -742,4 +755,128 @@ small {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 212, 255, 0.6);
+}
+
+/* ============================================================================
+   11. NAVIGATION BAR STYLES
+   ============================================================================ */
+
+.navigation-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to bottom,
+    rgba(10, 10, 26, 0.95),
+    rgba(10, 10, 26, 0.8));
+  border-bottom: 2px solid var(--color-accent-cyan);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-lg);
+  gap: var(--space-lg);
+  z-index: 100;
+  box-shadow: 0 8px 16px rgba(0, 212, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.navigation-bar.hidden {
+  display: none;
+}
+
+.nav-button {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  text-transform: uppercase;
+  font-family: var(--font-game);
+}
+
+.nav-button:hover {
+  color: var(--color-accent-cyan);
+  border-color: var(--color-accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+  background-color: rgba(0, 212, 255, 0.05);
+}
+
+.nav-button--active {
+  background-color: rgba(0, 212, 255, 0.15);
+  color: #00ffff;
+  border-color: var(--color-accent-cyan);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.4), inset 0 0 10px rgba(0, 212, 255, 0.1);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* ============================================================================
+   12. SPACE FACTS TICKER STYLES
+   ============================================================================ */
+
+.space-facts-ticker {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: linear-gradient(to top,
+    rgba(10, 10, 26, 0.95),
+    rgba(10, 10, 26, 0.8));
+  border-top: 2px solid var(--color-accent-cyan);
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-lg);
+  z-index: 100;
+  box-shadow: 0 -8px 16px rgba(0, 212, 255, 0.1);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+
+.space-facts-ticker.hidden {
+  display: none;
+}
+
+.ticker-content {
+  font-size: 0.875rem;
+  color: var(--color-accent-cyan);
+  white-space: nowrap;
+  animation: tickerScroll 30s linear infinite;
+  animation-fill-mode: both;
+}
+
+.ticker-content.fade-in {
+  animation: tickerFadeIn 0.5s ease-in-out forwards;
+}
+
+@keyframes tickerScroll {
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+  }
+  95% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes tickerFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }
