@@ -51,14 +51,35 @@ class SaveSystem {
         return null;
       }
       const parsed = JSON.parse(data);
-      // Version check
-      if (parsed.meta?.saveVersion !== 1) {
+      // Version check and migration
+      const saveVersion = parsed.meta?.saveVersion;
+      if (!saveVersion || saveVersion > 1) {
         return null;
       }
-      return parsed;
+      if (saveVersion < 1) {
+        return null;
+      }
+      // Apply migrations if needed
+      return this.#migrate(parsed);
     } catch {
       return null;
     }
+  }
+
+  /**
+   * Migrate save data from older versions to current version
+   * @param {Object} data - The save data to migrate
+   * @returns {Object} Migrated save data
+   * @private
+   */
+  #migrate(data) {
+    const currentVersion = 1;
+    const saveVersion = data.meta?.saveVersion || 0;
+
+    // Version 0 -> 1 migrations would go here
+    // For now, no migrations needed as we're on version 1
+
+    return data;
   }
 
   /**

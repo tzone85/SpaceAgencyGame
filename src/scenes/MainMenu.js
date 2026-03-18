@@ -15,7 +15,8 @@ import SaveSystem from "../game/SaveSystem.js";
 import EventBus from "../game/EventBus.js";
 
 class MainMenu {
-  constructor() {
+  constructor(gameInstance = null) {
+    this.gameInstance = gameInstance;
     this.menuElement = null;
     this.titleElement = null;
     this.buttonsContainer = null;
@@ -112,13 +113,19 @@ class MainMenu {
     this.buttonsContainer = document.createElement("div");
     this.buttonsContainer.className = "menu-buttons";
 
+    // Check if a save exists to determine if Continue should be enabled
+    const hasSave =
+      (this.gameInstance && this.gameInstance.saveSystem
+        ? this.gameInstance.saveSystem.hasSave()
+        : false) || (this.saveSystem ? this.saveSystem.hasSave() : false);
+
     // Create buttons - Continue button only shows if save exists
     const buttonConfigs = [
       { id: "newGameBtn", label: "NEW GAME", action: "newGame" },
     ];
 
     // Conditionally add Continue button if save exists
-    if (this.saveSystem && this.saveSystem.hasSave()) {
+    if (hasSave) {
       buttonConfigs.push({
         id: "continueBtn",
         label: "CONTINUE GAME",
@@ -138,6 +145,10 @@ class MainMenu {
       button.className = "menu-button";
       button.textContent = config.label;
       button.dataset.action = config.action;
+      if (config.disabled) {
+        button.disabled = true;
+        button.classList.add("menu-button--disabled");
+      }
       this.buttonsContainer.appendChild(button);
       this.buttons.push(button);
     });
