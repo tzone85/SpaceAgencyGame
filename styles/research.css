@@ -1,5 +1,378 @@
+/**
+ * ResearchLab Scene Styles
+ *
+ * Styling for the horizontal tech tree visualization with node states:
+ * - Completed: Cyan glow with checkmark
+ * - Available: White border, clickable
+ * - Locked: Grey with lock icon
+ * - Active: Pulsing purple border with progress bar
+ */
+
+.research-lab-scene {
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%);
+  color: #e0e6ff;
+  font-family: 'Arial', sans-serif;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.research-header {
+  padding: 20px 0;
+  text-align: center;
+  border-bottom: 2px solid #4a6fa5;
+  background: rgba(20, 25, 50, 0.8);
+}
+
+.research-header h1 {
+  margin: 0;
+  font-size: 32px;
+  color: #00d9ff;
+  text-shadow: 0 0 10px rgba(0, 217, 255, 0.5);
+  letter-spacing: 3px;
+}
+
+.research-main-container {
+  display: flex;
+  flex: 1;
+  gap: 20px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+/* Tech Tree Container */
+.tech-tree-container {
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 20px;
+  background: rgba(10, 15, 35, 0.5);
+  border: 1px solid #4a6fa5;
+  border-radius: 8px;
+}
+
+/* Category Column */
+.research-category-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 150px;
+  flex-shrink: 0;
+}
+
+.category-label {
+  text-align: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #00d9ff;
+  text-transform: uppercase;
+  padding: 8px;
+  background: rgba(0, 217, 255, 0.1);
+  border-radius: 4px;
+  border: 1px solid rgba(0, 217, 255, 0.3);
+}
+
+/* Tech Node Base Styling */
+.tech-node {
+  position: relative;
+  padding: 12px;
+  min-height: 80px;
+  border: 2px solid #888;
+  border-radius: 6px;
+  background: #1a1f3a;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.node-name {
+  text-align: center;
+  font-size: 12px;
+  font-weight: bold;
+  color: #e0e6ff;
+  margin-bottom: 4px;
+}
+
+/* Node State: Completed */
+.tech-node.node-completed {
+  background: rgba(0, 217, 255, 0.15);
+  border-color: #00d9ff;
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.4), inset 0 0 10px rgba(0, 217, 255, 0.1);
+}
+
+.tech-node.node-completed .node-name {
+  color: #00d9ff;
+}
+
+.node-checkmark {
+  font-size: 20px;
+  color: #00ff00;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.6);
+}
+
+/* Node State: Available */
+.tech-node.node-available {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tech-node.node-available:hover {
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.tech-node.node-available .node-name {
+  color: #ffffff;
+}
+
+/* Node State: Active (Pulsing) */
+.tech-node.node-active {
+  background: rgba(128, 0, 255, 0.15);
+  border-color: #8000ff;
+  animation: pulse-border 1.5s infinite;
+}
+
+.tech-node.node-active .node-name {
+  color: #bb86fc;
+}
+
+@keyframes pulse-border {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(128, 0, 255, 0.4);
+    border-color: #8000ff;
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(128, 0, 255, 0.8);
+    border-color: #bb86fc;
+  }
+}
+
+/* Node Progress Bar */
+.node-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #8000ff, #bb86fc);
+  border-radius: 2px;
+  transition: width 0.2s ease;
+  box-shadow: 0 0 5px rgba(128, 0, 255, 0.6);
+}
+
+/* Node State: Locked */
+.tech-node.node-locked {
+  background: rgba(100, 100, 100, 0.1);
+  border-color: #666;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.tech-node.node-locked .node-name {
+  color: #999;
+}
+
+.node-lock {
+  font-size: 16px;
+}
+
+/* Node Selected State */
+.tech-node.node-selected {
+  box-shadow: 0 0 20px rgba(255, 255, 0, 0.6) !important;
+  transform: scale(1.05);
+}
+
+/* Detail Panel */
+.research-detail-panel {
+  width: 300px;
+  padding: 20px;
+  background: rgba(20, 25, 50, 0.8);
+  border: 1px solid #4a6fa5;
+  border-radius: 8px;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-content h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #00d9ff;
+  border-bottom: 1px solid #4a6fa5;
+  padding-bottom: 8px;
+}
+
+.detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-section label {
+  font-weight: bold;
+  color: #00d9ff;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.detail-section span,
+.detail-section p {
+  font-size: 13px;
+  color: #b0b6d0;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.detail-section p {
+  font-style: italic;
+  color: #d0d6e0;
+}
+
+/* Research Button */
+.research-button {
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #00d9ff, #0099cc);
+  border: none;
+  border-radius: 4px;
+  color: #000;
+  font-weight: bold;
+  font-size: 13px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 1px;
+}
+
+.research-button:hover {
+  box-shadow: 0 0 15px rgba(0, 217, 255, 0.6);
+  transform: translateY(-2px);
+}
+
+.research-button:active {
+  transform: translateY(0);
+  box-shadow: 0 0 10px rgba(0, 217, 255, 0.4);
+}
+
+/* Status Messages */
+.status-completed {
+  color: #00ff00;
+  text-align: center;
+  padding: 8px;
+  background: rgba(0, 255, 0, 0.1);
+  border-radius: 4px;
+  border-left: 3px solid #00ff00;
+  margin: 12px 0 0 0;
+  font-weight: bold;
+}
+
+.status-active {
+  color: #bb86fc;
+  text-align: center;
+  padding: 8px;
+  background: rgba(128, 0, 255, 0.1);
+  border-radius: 4px;
+  border-left: 3px solid #bb86fc;
+  margin: 12px 0 0 0;
+  font-weight: bold;
+}
+
+.status-locked {
+  color: #ff6b6b;
+  text-align: center;
+  padding: 8px;
+  background: rgba(255, 107, 107, 0.1);
+  border-radius: 4px;
+  border-left: 3px solid #ff6b6b;
+  margin: 12px 0 0 0;
+  font-weight: bold;
+}
+
+/* Scrollbar Styling */
+.tech-tree-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tech-tree-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.tech-tree-container::-webkit-scrollbar-thumb {
+  background: #4a6fa5;
+  border-radius: 4px;
+}
+
+.tech-tree-container::-webkit-scrollbar-thumb:hover {
+  background: #00d9ff;
+}
+
+.research-detail-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.research-detail-panel::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.research-detail-panel::-webkit-scrollbar-thumb {
+  background: #4a6fa5;
+  border-radius: 4px;
+}
+
+.research-detail-panel::-webkit-scrollbar-thumb:hover {
+  background: #00d9ff;
+}
+
 /* Research Lab Scene Styles */
 
 .research-lab {
   /* Research lab specific styles */
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .research-main-container {
+    flex-direction: column;
+  }
+
+  .research-detail-panel {
+    width: 100%;
+    max-height: 200px;
+  }
+
+  .tech-tree-container {
+    flex-direction: column;
+  }
+
+  .research-category-column {
+    min-width: 100%;
+    flex-direction: row;
+    gap: 8px;
+  }
+
+  .tech-node {
+    min-height: 60px;
+  }
 }
