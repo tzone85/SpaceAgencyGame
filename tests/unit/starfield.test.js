@@ -21,12 +21,22 @@ describe("Starfield", () => {
     // Mock canvas context methods
     context = {
       fillStyle: "",
+      strokeStyle: "",
+      lineCap: "",
+      lineWidth: 0,
+      globalAlpha: 1,
       fillRect: jest.fn(),
       beginPath: jest.fn(),
       arc: jest.fn(),
       fill: jest.fn(),
+      stroke: jest.fn(),
       clearRect: jest.fn(),
       getImageData: jest.fn(),
+      moveTo: jest.fn(),
+      lineTo: jest.fn(),
+      createLinearGradient: jest.fn(() => ({
+        addColorStop: jest.fn(),
+      })),
     };
 
     canvas.getContext = jest.fn(() => context);
@@ -551,6 +561,152 @@ describe("Starfield", () => {
     });
   });
 
+  describe("Mouse-Tracked Parallax", () => {
+    beforeEach(() => {
+      starfield = new Starfield(canvas);
+    });
+
+    test("should initialize mouse position at canvas center", () => {
+      expect(starfield.mouseX).toBe(canvas.width / 2);
+      expect(starfield.mouseY).toBe(canvas.height / 2);
+    });
+
+    test("should update mouse position on move", () => {
+      const mockEvent = {
+        clientX: 100,
+        clientY: 150,
+      };
+
+      canvas.getBoundingClientRect = jest.fn(() => ({
+        left: 0,
+        top: 0,
+      }));
+
+      starfield.handleMouseMove(mockEvent);
+
+      expect(starfield.mouseX).toBe(100);
+      expect(starfield.mouseY).toBe(150);
+    });
+
+    test("should apply parallax offset based on mouse position", () => {
+      starfield.isAnimating = true;
+      starfield.mouseX = canvas.width * 0.75; // Move mouse right
+
+      const initialOffset = starfield.layers[0].parallaxOffset || 0;
+      starfield.update(0.016);
+
+      expect(starfield.layers[0].parallaxOffset).not.toBe(initialOffset);
+    });
+
+    test("should register and unregister mouse listener", () => {
+      const addEventListenerSpy = jest.spyOn(canvas, "addEventListener");
+      const removeEventListenerSpy = jest.spyOn(canvas, "removeEventListener");
+
+      starfield.registerMouseListener();
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        "mousemove",
+        starfield.handleMouseMove,
+      );
+
+      starfield.unregisterMouseListener();
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "mousemove",
+        starfield.handleMouseMove,
+      );
+
+      addEventListenerSpy.mockRestore();
+      removeEventListenerSpy.mockRestore();
+    });
+
+    test("should vary parallax offset by layer depth", () => {
+      starfield.isAnimating = true;
+      starfield.mouseX = canvas.width * 0.75;
+
+      starfield.update(0.1);
+
+      const offsets = starfield.layers.map((l) => l.parallaxOffset || 0);
+      // Each deeper layer should have proportionally larger offset (depth factor increases)
+      expect(offsets[0]).toBeLessThan(offsets[1]);
+      expect(offsets[1]).toBeLessThan(offsets[2]);
+    });
+  });
+
+  describe("Shooting Stars", () => {
+    beforeEach(() => {
+      starfield = new Starfield(canvas);
+    });
+
+    test("should initialize empty shooting stars array", () => {
+      expect(starfield.shootingStars).toEqual([]);
+    });
+
+    test("should spawn shooting stars randomly", () => {
+      starfield.isAnimating = true;
+      starfield.shootingStarFrequency = 1.0; // Always spawn
+
+      starfield.update(0.016);
+
+      expect(starfield.shootingStars.length).toBeGreaterThan(0);
+    });
+
+    test("should update shooting star positions", () => {
+      starfield.shootingStars.push({
+        x: 100,
+        y: 100,
+        vx: 10,
+        vy: 10,
+        age: 0,
+        lifetime: 1,
+      });
+
+      const initialX = starfield.shootingStars[0].x;
+      starfield.updateShootingStars(0.1);
+
+      expect(starfield.shootingStars[0].x).toBeGreaterThan(initialX);
+    });
+
+    test("should remove expired shooting stars", () => {
+      starfield.shootingStars.push({
+        x: 100,
+        y: 100,
+        vx: 10,
+        vy: 10,
+        age: 0.9,
+        lifetime: 0.5, // Already expired
+      });
+
+      starfield.updateShootingStars(0.1);
+
+      expect(starfield.shootingStars.length).toBe(0);
+    });
+
+    test("should spawn shooting star with correct properties", () => {
+      starfield.spawnShootingStar();
+
+      expect(starfield.shootingStars.length).toBe(1);
+      const star = starfield.shootingStars[0];
+      expect(star).toHaveProperty("x");
+      expect(star).toHaveProperty("y");
+      expect(star).toHaveProperty("vx");
+      expect(star).toHaveProperty("vy");
+      expect(star).toHaveProperty("length");
+      expect(star).toHaveProperty("width");
+      expect(star).toHaveProperty("lifetime");
+      expect(star.age).toBe(0);
+    });
+
+    test("should render shooting stars on render", () => {
+      starfield.spawnShootingStar();
+      context.createLinearGradient = jest.fn(() => ({
+        addColorStop: jest.fn(),
+      }));
+
+      starfield.render();
+
+      expect(context.createLinearGradient).toHaveBeenCalled();
+    });
+  });
+
   describe("Integration", () => {
     beforeEach(() => {
       starfield = new Starfield(canvas);
@@ -609,6 +765,29 @@ describe("Starfield", () => {
 
       starfield.stop();
       starfield.unregisterResizeListener();
+    });
+
+    test("should cleanup shooting stars on destroy", () => {
+      starfield.spawnShootingStar();
+      expect(starfield.shootingStars.length).toBeGreaterThan(0);
+
+      starfield.destroy();
+
+      expect(starfield.shootingStars.length).toBe(0);
+    });
+
+    test("should unregister mouse listener on destroy", () => {
+      const removeEventListenerSpy = jest.spyOn(canvas, "removeEventListener");
+
+      starfield.registerMouseListener();
+      starfield.destroy();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        "mousemove",
+        starfield.handleMouseMove,
+      );
+
+      removeEventListenerSpy.mockRestore();
     });
   });
 });
