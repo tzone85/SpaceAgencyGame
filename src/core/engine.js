@@ -1,125 +1,54 @@
 /**
  * Game Loop Engine
- * Handles the main game loop and timing
+ *
+ * Runs a requestAnimationFrame loop, calculates delta time,
+ * and calls registered update callbacks. Manages a Canvas 2D context.
+ * No WebGL, no 3D camera, no scene manager — systems and scenes
+ * will be added by later waves.
  */
-
-import Camera from "./camera.js";
-import SceneManager from "../managers/SceneManager.js";
-import SpaceScene from "../scenes/space-scene.js";
-import AudioManager from "../audio/AudioManager.js";
 
 class Engine {
   constructor() {
     this.frameRate = 60;
+    this.frameCount = 0;
     this.deltaTime = 0;
     this.lastTime = 0;
-    this.currentTime = 0;
     this.fpsTarget = 60;
-    this.frameInterval = 1000 / this.fpsTarget;
     this.animationFrameId = null;
     this.isRunning = false;
+    this.isInitialized = false;
 
-    // Canvas and renderer
+    // Canvas 2D
     this.canvas = null;
-    this.renderer = null;
+    this.ctx = null;
 
-    // 3D components
-    this.camera = null;
-    this.sceneManager = null;
+    // Registered update callbacks
+    this.updateCallbacks = [];
 
-    // Audio system
-    this.audioManager = null;
+    // Resize handler reference for cleanup
+    this.resizeHandler = null;
   }
 
   /**
-   * Initialize the engine - setup canvas, renderer, camera, scenes and audio
+   * Initialize the engine - setup canvas and 2D context
    */
-  async initialize() {
+  initialize() {
     if (this.isInitialized) {
       console.warn("Engine already initialized");
       return;
     }
 
-    console.log("Initializing 3D game engine...");
+    this.setupCanvas();
+    this.setupResizeHandler();
 
-    try {
-      // Setup canvas
-      this.setupCanvas();
-
-      // Initialize 3D camera
-      this.camera = new Camera(this.canvas);
-
-      // Initialize scene manager
-      this.sceneManager = new SceneManager(null, this.camera);
-
-      // Register and initialize default scenes
-      this.registerDefaultScenes();
-
-      // Setup resize handler
-      this.setupResizeHandler();
-
-      // Initialize audio manager
-      this.audioManager = new AudioManager();
-      await this.audioManager.initialize();
-
-      this.isInitialized = true;
-      console.log("3D Game engine initialized successfully");
-    } catch (error) {
-      console.error("Failed to initialize engine:", error);
-      throw error;
-    }
+    this.isInitialized = true;
+    console.log("Game engine initialized (Canvas 2D)");
   }
 
   /**
-   * Register default scenes
-   */
-  registerDefaultScenes() {
-    // Register the main space scene
-    this.sceneManager.registerScene("space", SpaceScene, {
-      starCount: 1500,
-      enableParticles: true,
-    });
-
-    // Switch to space scene as default
-    this.sceneManager.switchToScene("space");
-  }
-
-  /**
-   * Setup window resize handling
-   */
-  setupResizeHandler() {
-    const handleResize = () => {
-      if (this.canvas) {
-        const width = window.innerWidth;
-        const height = window.innerHeight;
-
-        this.canvas.width = width;
-        this.canvas.height = height;
-
-        // Update camera aspect ratio
-        if (this.camera) {
-          this.camera.updateAspectRatio(this.canvas);
-        }
-
-        // Notify current scene about resize
-        const currentScene = this.sceneManager?.getCurrentScene();
-        if (currentScene && currentScene.onResize) {
-          currentScene.onResize(width, height);
-        }
-      }
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    // Store reference for cleanup
-    this.resizeHandler = handleResize;
-  }
-
-  /**
-   * Setup the game canvas
+   * Setup the game canvas with a 2D context
    */
   setupCanvas() {
-    // Create canvas if it doesn't exist
     let canvas = document.getElementById("gameCanvas");
 
     if (!canvas) {
@@ -128,14 +57,12 @@ class Engine {
       document.body.appendChild(canvas);
     }
 
-    // Set canvas size
     const width = window.innerWidth;
     const height = window.innerHeight;
 
     canvas.width = width;
     canvas.height = height;
 
-    // Add styling for fullscreen 3D
     canvas.style.display = "block";
     canvas.style.margin = "0";
     canvas.style.padding = "0";
@@ -146,12 +73,46 @@ class Engine {
     canvas.style.zIndex = "1";
 
     this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
   }
 
   /**
-   * Start the main game loop and audio
+   * Setup window resize handling
    */
-  async start() {
+  setupResizeHandler() {
+    const handleResize = () => {
+      if (this.canvas) {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    this.resizeHandler = handleResize;
+  }
+
+  /**
+   * Register a callback to be called every frame with deltaTime
+   * @param {Function} callback - Receives deltaTime in seconds
+   * @returns {Function} Unregister function
+   */
+  onUpdate(callback) {
+    if (typeof callback !== "function") {
+      throw new Error("onUpdate callback must be a function");
+    }
+    this.updateCallbacks.push(callback);
+
+    return () => {
+      this.updateCallbacks = this.updateCallbacks.filter(
+        (cb) => cb !== callback
+      );
+    };
+  }
+
+  /**
+   * Start the main game loop
+   */
+  start() {
     if (!this.isInitialized) {
       console.error("Engine must be initialized before starting");
       return;
@@ -162,130 +123,53 @@ class Engine {
       return;
     }
 
-    console.log("Starting 3D game loop at 60 FPS...");
     console.log("Engine started");
-
-    // Start audio system (needs user interaction to resume context)
-    if (this.audioManager) {
-      try {
-        await this.audioManager.resumeContext();
-        this.audioManager.startAmbientMusic();
-      } catch (error) {
-        console.warn(
-          "Audio start failed (may require user interaction):",
-          error,
-        );
-      }
-    }
-
     this.isRunning = true;
     this.lastTime = performance.now();
     this.loop();
   }
 
   /**
-   * Main game loop - runs at 60 FPS
+   * Core loop - calculates delta, invokes update callbacks, schedules next frame
    */
-  gameLoop = () => {
-    this.currentTime = performance.now();
-    this.deltaTime = (this.currentTime - this.lastTime) / 1000; // Convert to seconds
-    this.lastTime = this.currentTime;
+  loop() {
+    if (!this.isRunning) return;
 
-    // Cap delta time to prevent large jumps
+    const now = performance.now();
+    this.deltaTime = (now - this.lastTime) / 1000;
+    this.lastTime = now;
+
+    // Cap delta to prevent large jumps (e.g. after tab switch)
     if (this.deltaTime > 0.1) {
       this.deltaTime = 0.1;
     }
 
-    // Update game state
     this.update(this.deltaTime);
-
-    // Render
-    this.render();
-
-    // Continue loop if still running
-    if (this.isRunning) {
-      this.animationFrameId = requestAnimationFrame(this.gameLoop);
-    }
-  };
-
-  /**
-   * Update game state
-   */
-  update(deltaTime) {
-    // Update game logic
-    console.log("Engine update:", deltaTime);
     this.frameCount++;
 
-    // Update camera
-    if (this.camera) {
-      this.camera.update(deltaTime);
-    }
-
-    // Update scene manager and current scene
-    if (this.sceneManager) {
-      this.sceneManager.update(deltaTime);
-    }
+    this.animationFrameId = requestAnimationFrame(() => this.loop());
   }
 
   /**
-   * Render the game
+   * Call all registered update callbacks
+   * @param {number} deltaTime - Time since last frame in seconds
    */
-  render() {
-    // Render through scene manager
-    if (this.sceneManager) {
-      this.sceneManager.render();
+  update(deltaTime) {
+    for (const callback of this.updateCallbacks) {
+      try {
+        callback(deltaTime);
+      } catch (error) {
+        console.error("Error in update callback:", error);
+      }
     }
   }
 
   /**
-   * Get the camera instance
-   */
-  getCamera() {
-    return this.camera;
-  }
-
-  /**
-   * Get the scene manager instance
-   */
-  getSceneManager() {
-    return this.sceneManager;
-  }
-
-  /**
-   * Switch to a scene
-   */
-  switchScene(sceneId) {
-    if (this.sceneManager) {
-      return this.sceneManager.switchToScene(sceneId);
-    }
-    return false;
-  }
-
-  /**
-   * Transition to a scene with animation
-   */
-  transitionToScene(sceneId, transitionType = "fade", duration = 1.0) {
-    if (this.sceneManager) {
-      return this.sceneManager.transitionToScene(
-        sceneId,
-        transitionType,
-        duration,
-      );
-    }
-    return false;
-  }
-
-  /**
-   * Stop the game loop and audio
+   * Stop the game loop
    */
   stop() {
     console.log("Engine stopped");
     this.isRunning = false;
-
-    // Stop audio
-    if (this.audioManager) {
-      this.audioManager.stopAmbientMusic();
-    }
 
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
@@ -295,6 +179,7 @@ class Engine {
 
   /**
    * Get engine statistics
+   * @returns {Object} Current engine stats
    */
   getStats() {
     return {
@@ -305,69 +190,35 @@ class Engine {
       fpsTarget: this.fpsTarget,
       canvasWidth: this.canvas ? this.canvas.width : 0,
       canvasHeight: this.canvas ? this.canvas.height : 0,
-      cameraState: this.camera ? this.camera.getState() : null,
-      sceneManagerState: this.sceneManager
-        ? this.sceneManager.getState()
-        : null,
-      audioStats: this.audioManager ? this.audioManager.getStats() : null,
     };
   }
 
+  /**
+   * Destroy the engine and clean up all resources
+   */
   destroy() {
-    // Stop the game loop
     this.stop();
 
-    // Cancel animation frame
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
       this.animationFrameId = null;
     }
 
-    // Remove resize handler
     if (this.resizeHandler) {
       window.removeEventListener("resize", this.resizeHandler);
       this.resizeHandler = null;
     }
 
-    // Destroy scene manager
-    if (this.sceneManager) {
-      this.sceneManager.destroy();
-      this.sceneManager = null;
-    }
+    this.updateCallbacks = [];
 
-    // Clear camera reference
-    this.camera = null;
-
-    if (this.audioManager) {
-      this.audioManager.destroy();
-      this.audioManager = null;
-    }
-
-    // Destroy renderer
-    if (this.renderer) {
-      this.renderer.destroy();
-      this.renderer = null;
-    }
-
-    // Remove canvas
     if (this.canvas && this.canvas.parentNode) {
       this.canvas.parentNode.removeChild(this.canvas);
-      this.canvas = null;
     }
-
+    this.canvas = null;
+    this.ctx = null;
     this.isInitialized = false;
+
     console.log("Engine destroyed");
-  }
-
-  loop() {
-    if (!this.isRunning) return;
-
-    const now = performance.now();
-    this.deltaTime = (now - this.lastTime) / 1000;
-    this.lastTime = now;
-
-    this.update(this.deltaTime);
-    requestAnimationFrame(() => this.loop());
   }
 }
 
