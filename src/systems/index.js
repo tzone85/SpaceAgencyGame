@@ -1,9 +1,11 @@
 /**
  * Systems Module
- * 
- * Placeholder for game systems that handle specific functionality.
- * This module will manage physics, audio, input, mission systems, etc.
+ *
+ * Exports all game systems that handle specific functionality.
+ * Includes physics, audio, input, mission systems, crew systems, etc.
  */
+
+import CrewSystem from "./CrewSystem.js";
 
 export const SystemManager = class {
   constructor() {
@@ -11,12 +13,13 @@ export const SystemManager = class {
   }
 
   initialize() {
-    console.log('System Manager initialized');
+    console.log("System Manager initialized");
   }
 
   destroy() {
-    console.log('System Manager destroyed');
+    console.log("System Manager destroyed");
   }
 };
 
+export { CrewSystem };
 export default SystemManager;
