@@ -146,13 +146,11 @@ describe("SaveSystem", () => {
       const originalSetItem = localStorage.setItem;
       const quotaError = new DOMException(
         "Storage quota exceeded",
-        "QuotaExceededError"
+        "QuotaExceededError",
       );
-      jest
-        .spyOn(Storage.prototype, "setItem")
-        .mockImplementation(() => {
-          throw quotaError;
-        });
+      jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+        throw quotaError;
+      });
 
       const result = saveSystem.save({ meta: { saveVersion: 1 } });
 
@@ -165,11 +163,9 @@ describe("SaveSystem", () => {
     });
 
     test("should return false on generic save errors", () => {
-      jest
-        .spyOn(Storage.prototype, "setItem")
-        .mockImplementation(() => {
-          throw new Error("Generic error");
-        });
+      jest.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+        throw new Error("Generic error");
+      });
 
       const result = saveSystem.save({ meta: { saveVersion: 1 } });
       expect(result).toBe(false);
@@ -188,6 +184,166 @@ describe("SaveSystem", () => {
 
       const loaded = noEventBusSave.load();
       expect(loaded).toEqual(state);
+    });
+  });
+
+  describe("version migration", () => {
+    test("should reject save version 0", () => {
+      const state = { meta: { saveVersion: 0 } };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+
+      const loaded = saveSystem.load();
+      expect(loaded).toBeNull();
+    });
+
+    test("should reject save version 2 (future)", () => {
+      const state = { meta: { saveVersion: 2 } };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+
+      const loaded = saveSystem.load();
+      expect(loaded).toBeNull();
+    });
+
+    test("should accept and return version 1 state", () => {
+      const state = {
+        meta: { saveVersion: 1 },
+        budget: { balance: 1000 },
+      };
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+
+      const loaded = saveSystem.load();
+      expect(loaded).toEqual(state);
+    });
+  });
+
+  describe("complete game state save/load", () => {
+    test("should save and load full game state with all systems", () => {
+      const completeState = {
+        agency: {
+          name: "Stellar Horizon Space Agency",
+          reputation: 75,
+          founded: "2024-Q1",
+        },
+        budget: {
+          balance: 250_000_000,
+          quarterlyFunding: 50_000_000,
+          currentQuarter: 2,
+          currentYear: 2024,
+          history: [
+            { quarter: 1, income: 50_000_000, spent: 10_000_000 },
+            { quarter: 2, income: 50_000_000, spent: 15_000_000 },
+          ],
+        },
+        missions: {
+          available: [
+            { id: "m1", name: "Moon Base", progress: 0 },
+            { id: "m2", name: "Mars Probe", progress: 0 },
+          ],
+          active: [{ id: "m3", name: "LEO Station", progress: 0.5 }],
+          completed: [],
+        },
+        crew: {
+          roster: [
+            { id: "c1", name: "Alice", role: "Captain", health: 100 },
+            { id: "c2", name: "Bob", role: "Engineer", health: 95 },
+          ],
+          applicants: [],
+          training: [],
+        },
+        research: {
+          completed: [{ id: "r1", name: "BasicRocket" }],
+          active: { id: "r2", name: "AdvancedThrusters", progress: 0.3 },
+          available: [
+            { id: "r3", name: "WarpDrive" },
+            { id: "r4", name: "HyperDrive" },
+          ],
+        },
+        events: {
+          active: [{ id: "e1", type: "warning", message: "Solar flare" }],
+          history: [{ id: "e0", type: "info", message: "Game started" }],
+        },
+        tutorial: {
+          completed: true,
+          currentStep: 5,
+        },
+        meta: {
+          saveVersion: 1,
+          lastSaved: new Date().toISOString(),
+          totalPlayTime: 3600,
+        },
+      };
+
+      const result = saveSystem.save(completeState);
+      expect(result).toBe(true);
+
+      const loaded = saveSystem.load();
+      expect(loaded).toEqual(completeState);
+      expect(loaded.budget.balance).toBe(250_000_000);
+      expect(loaded.missions.active).toHaveLength(1);
+      expect(loaded.crew.roster).toHaveLength(2);
+      expect(loaded.research.completed).toHaveLength(1);
+      expect(loaded.events.active).toHaveLength(1);
+    });
+
+    test("should handle large nested arrays in game state", () => {
+      const largeState = {
+        meta: { saveVersion: 1 },
+        missions: {
+          available: Array.from({ length: 50 }, (_, i) => ({
+            id: `m${i}`,
+            name: `Mission ${i}`,
+            progress: 0,
+          })),
+          active: [],
+          completed: Array.from({ length: 30 }, (_, i) => ({
+            id: `m${i + 50}`,
+            name: `Mission ${i + 50}`,
+            progress: 1,
+          })),
+        },
+        crew: {
+          roster: Array.from({ length: 100 }, (_, i) => ({
+            id: `c${i}`,
+            name: `Crew Member ${i}`,
+          })),
+          applicants: [],
+          training: [],
+        },
+      };
+
+      const result = saveSystem.save(largeState);
+      expect(result).toBe(true);
+
+      const loaded = saveSystem.load();
+      expect(loaded.missions.available).toHaveLength(50);
+      expect(loaded.missions.completed).toHaveLength(30);
+      expect(loaded.crew.roster).toHaveLength(100);
+    });
+  });
+
+  describe("timestamp handling", () => {
+    test("should preserve ISO timestamp in lastSaved", () => {
+      const now = new Date().toISOString();
+      const state = {
+        meta: { saveVersion: 1, lastSaved: now },
+      };
+
+      saveSystem.save(state);
+      const loaded = saveSystem.load();
+
+      expect(loaded.meta.lastSaved).toBe(now);
+      expect(new Date(loaded.meta.lastSaved)).toBeInstanceOf(Date);
+    });
+
+    test("should handle null lastSaved", () => {
+      const state = {
+        meta: { saveVersion: 1, lastSaved: null },
+      };
+
+      saveSystem.save(state);
+      const loaded = saveSystem.load();
+
+      expect(loaded.meta.lastSaved).toBeNull();
     });
   });
 });

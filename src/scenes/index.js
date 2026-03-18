@@ -9,6 +9,7 @@ import MainMenu from "./MainMenu.js";
 import CrewQuarters from "./CrewQuarters.js";
 import LaunchSequence from "./LaunchSequence.js";
 import Tutorial from "./Tutorial.js";
+import Settings from "./Settings.js";
 
 export const SceneManager = class {
   constructor() {
@@ -34,5 +35,5 @@ export const SceneManager = class {
   }
 };
 
-export { MainMenu, CrewQuarters, LaunchSequence, Tutorial };
+export { MainMenu, CrewQuarters, LaunchSequence, Tutorial, Settings };
 export default SceneManager;
