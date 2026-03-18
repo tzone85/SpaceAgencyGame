@@ -5,6 +5,8 @@
  * sound effects, volume controls, and Web Audio API lifecycle management.
  */
 
+import EventBus from "../game/EventBus.js";
+
 class AudioManager {
   constructor() {
     this.isInitialized = false;
@@ -22,7 +24,7 @@ class AudioManager {
     // Procedural music state
     this.musicNodes = [];
     this.musicTempo = 60; // BPM
-    this.musicKey = 'C'; // Root note for procedural generation
+    this.musicKey = "C"; // Root note for procedural generation
     this.ambientDrones = [];
 
     // Sound effect management
@@ -30,14 +32,18 @@ class AudioManager {
     this.activeEffects = new Set();
 
     // Procedural music parameters
-    this.ambientFrequencies = [65.41, 98.00, 130.81, 196.00, 261.63]; // C2, G2, C3, G3, C4
+    this.ambientFrequencies = [65.41, 98.0, 130.81, 196.0, 261.63]; // C2, G2, C3, G3, C4
     this.musicUpdateInterval = null;
     this.nextNoteTime = 0;
     this.noteResolution = 0.25; // Quarter note
 
     // Audio context state management
-    this.contextState = 'suspended';
+    this.contextState = "suspended";
     this.resumePromise = null;
+
+    // EventBus integration
+    this.eventBus = null;
+    this.eventListeners = [];
   }
 
   /**
@@ -53,7 +59,9 @@ class AudioManager {
       console.log("Initializing AudioManager...");
 
       // Create audio context
-      this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      this.audioContext = new (
+        window.AudioContext || window.webkitAudioContext
+      )();
       this.contextState = this.audioContext.state;
 
       // Create master gain node
@@ -74,17 +82,66 @@ class AudioManager {
       this.initializeProceduralMusic();
 
       // Handle audio context state changes
-      this.audioContext.addEventListener('statechange', () => {
+      this.audioContext.addEventListener("statechange", () => {
         this.contextState = this.audioContext.state;
         console.log(`Audio context state: ${this.contextState}`);
       });
 
+      // Setup EventBus integration for automatic sound triggering
+      this.setupEventBus();
+
       this.isInitialized = true;
       console.log("AudioManager initialized successfully");
-
     } catch (error) {
       console.error("Failed to initialize AudioManager:", error);
       throw error;
+    }
+  }
+
+  /**
+   * Setup EventBus listeners for game events
+   */
+  setupEventBus() {
+    try {
+      this.eventBus = EventBus.getInstance();
+
+      // Subscribe to game events for automatic sound triggering
+      const unsubscribeMissionLaunch = this.eventBus.subscribe(
+        "mission:launched",
+        () => this.playMissionLaunchSFX(),
+        this,
+      );
+      const unsubscribeMissionComplete = this.eventBus.subscribe(
+        "mission:completed",
+        () => this.playMissionCompleteSFX(),
+        this,
+      );
+      const unsubscribeBudgetWarning = this.eventBus.subscribe(
+        "budget:warning",
+        () => this.playBudgetWarningSFX(),
+        this,
+      );
+      const unsubscribeResearchComplete = this.eventBus.subscribe(
+        "research:completed",
+        () => this.playResearchCompleteSFX(),
+        this,
+      );
+      const unsubscribeEventTriggered = this.eventBus.subscribe(
+        "event:triggered",
+        () => this.playEventNotificationSFX(),
+        this,
+      );
+
+      // Store unsubscribe functions for cleanup
+      this.eventListeners = [
+        unsubscribeMissionLaunch,
+        unsubscribeMissionComplete,
+        unsubscribeBudgetWarning,
+        unsubscribeResearchComplete,
+        unsubscribeEventTriggered,
+      ];
+    } catch (error) {
+      console.warn("Failed to setup EventBus listeners:", error);
     }
   }
 
@@ -96,7 +153,7 @@ class AudioManager {
       return false;
     }
 
-    if (this.audioContext.state === 'suspended') {
+    if (this.audioContext.state === "suspended") {
       if (!this.resumePromise) {
         this.resumePromise = this.audioContext.resume();
       }
@@ -105,7 +162,7 @@ class AudioManager {
       return true;
     }
 
-    return this.audioContext.state === 'running';
+    return this.audioContext.state === "running";
   }
 
   /**
@@ -121,7 +178,7 @@ class AudioManager {
       const filterNode = this.audioContext.createBiquadFilter();
 
       // Configure oscillator for ambient drone
-      oscillator.type = 'sawtooth';
+      oscillator.type = "sawtooth";
       oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
 
       // Add slight detuning for organic feel
@@ -129,8 +186,11 @@ class AudioManager {
       oscillator.detune.setValueAtTime(detune, this.audioContext.currentTime);
 
       // Configure filter for warmth
-      filterNode.type = 'lowpass';
-      filterNode.frequency.setValueAtTime(800 + Math.random() * 400, this.audioContext.currentTime);
+      filterNode.type = "lowpass";
+      filterNode.frequency.setValueAtTime(
+        800 + Math.random() * 400,
+        this.audioContext.currentTime,
+      );
       filterNode.Q.setValueAtTime(1, this.audioContext.currentTime);
 
       // Configure gain for subtle presence
@@ -147,7 +207,7 @@ class AudioManager {
         gainNode,
         filterNode,
         baseFreq: freq,
-        targetGain: 0.05 + Math.random() * 0.03
+        targetGain: 0.05 + Math.random() * 0.03,
       });
 
       // Start oscillator
@@ -168,7 +228,7 @@ class AudioManager {
 
       drone.gainNode.gain.exponentialRampToValueAtTime(
         drone.targetGain,
-        startTime + fadeTime
+        startTime + fadeTime,
       );
 
       // Add subtle frequency modulation
@@ -188,10 +248,10 @@ class AudioManager {
     if (!this.isInitialized) return;
 
     // Fade out ambient drones
-    this.ambientDrones.forEach(drone => {
+    this.ambientDrones.forEach((drone) => {
       drone.gainNode.gain.exponentialRampToValueAtTime(
         0.001,
-        this.audioContext.currentTime + 2.0
+        this.audioContext.currentTime + 2.0,
       );
     });
 
@@ -236,7 +296,7 @@ class AudioManager {
     // Schedule next note
     this.musicUpdateInterval = setTimeout(
       () => this.scheduleNote(),
-      (this.nextNoteTime - this.audioContext.currentTime) * 1000
+      (this.nextNoteTime - this.audioContext.currentTime) * 1000,
     );
   }
 
@@ -247,18 +307,22 @@ class AudioManager {
     if (!this.audioContext) return;
 
     const duration = 2.0 + Math.random() * 4.0; // 2-6 seconds
-    const frequency = this.ambientFrequencies[Math.floor(Math.random() * this.ambientFrequencies.length)] * (1 + Math.floor(Math.random() * 3));
+    const frequency =
+      this.ambientFrequencies[
+        Math.floor(Math.random() * this.ambientFrequencies.length)
+      ] *
+      (1 + Math.floor(Math.random() * 3));
 
     const oscillator = this.audioContext.createOscillator();
     const gainNode = this.audioContext.createGain();
     const filterNode = this.audioContext.createBiquadFilter();
 
     // Configure oscillator
-    oscillator.type = Math.random() < 0.7 ? 'sine' : 'triangle';
+    oscillator.type = Math.random() < 0.7 ? "sine" : "triangle";
     oscillator.frequency.setValueAtTime(frequency, startTime);
 
     // Configure filter
-    filterNode.type = 'lowpass';
+    filterNode.type = "lowpass";
     filterNode.frequency.setValueAtTime(1200 + Math.random() * 800, startTime);
 
     // Configure envelope
@@ -275,7 +339,7 @@ class AudioManager {
     oscillator.stop(startTime + duration);
 
     // Cleanup
-    oscillator.addEventListener('ended', () => {
+    oscillator.addEventListener("ended", () => {
       oscillator.disconnect();
       gainNode.disconnect();
       filterNode.disconnect();
@@ -292,7 +356,7 @@ class AudioManager {
     const lfo = this.audioContext.createOscillator();
     const lfoGain = this.audioContext.createGain();
 
-    lfo.type = 'sine';
+    lfo.type = "sine";
     lfo.frequency.setValueAtTime(lfoFreq, startTime);
     lfoGain.gain.setValueAtTime(modDepth, startTime);
 
@@ -318,17 +382,20 @@ class AudioManager {
       const {
         frequency = 440,
         duration = 0.5,
-        type = 'sine',
+        type = "sine",
         volume = 1.0,
         fadeIn = 0.01,
-        fadeOut = 0.1
+        fadeOut = 0.1,
       } = options;
 
       const oscillator = this.audioContext.createOscillator();
       const gainNode = this.audioContext.createGain();
 
       oscillator.type = type;
-      oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+      oscillator.frequency.setValueAtTime(
+        frequency,
+        this.audioContext.currentTime,
+      );
 
       // Envelope
       const now = this.audioContext.currentTime;
@@ -345,14 +412,13 @@ class AudioManager {
       const effectId = `${name}-${Date.now()}`;
       this.activeEffects.add(effectId);
 
-      oscillator.addEventListener('ended', () => {
+      oscillator.addEventListener("ended", () => {
         this.activeEffects.delete(effectId);
         oscillator.disconnect();
         gainNode.disconnect();
       });
 
       return effectId;
-
     } catch (error) {
       console.error(`Failed to play sound effect ${name}:`, error);
       return null;
@@ -363,30 +429,125 @@ class AudioManager {
    * Create common game sound effects
    */
   createUIClickEffect() {
-    return this.playSoundEffect('ui-click', {
+    return this.playSoundEffect("ui-click", {
       frequency: 800,
       duration: 0.1,
-      type: 'square',
-      volume: 0.5
+      type: "square",
+      volume: 0.5,
     });
   }
 
   createSuccessEffect() {
-    return this.playSoundEffect('success', {
+    return this.playSoundEffect("success", {
       frequency: 523, // C5
       duration: 0.3,
-      type: 'triangle',
-      volume: 0.7
+      type: "triangle",
+      volume: 0.7,
     });
   }
 
   createErrorEffect() {
-    return this.playSoundEffect('error', {
+    return this.playSoundEffect("error", {
       frequency: 220, // A3
       duration: 0.2,
-      type: 'sawtooth',
-      volume: 0.6
+      type: "sawtooth",
+      volume: 0.6,
     });
+  }
+
+  /**
+   * Mission launch sound effect - ascending tone pattern
+   */
+  playMissionLaunchSFX() {
+    return this.playSoundEffect("mission-launch", {
+      frequency: 440, // A4
+      duration: 0.8,
+      type: "sine",
+      volume: 0.8,
+      fadeIn: 0.05,
+      fadeOut: 0.2,
+    });
+  }
+
+  /**
+   * Mission complete sound effect - celebratory chord
+   */
+  playMissionCompleteSFX() {
+    return this.playSoundEffect("mission-complete", {
+      frequency: 523, // C5
+      duration: 1.0,
+      type: "triangle",
+      volume: 0.9,
+      fadeIn: 0.1,
+      fadeOut: 0.3,
+    });
+  }
+
+  /**
+   * Budget warning sound effect - alert tone
+   */
+  playBudgetWarningSFX() {
+    return this.playSoundEffect("budget-warning", {
+      frequency: 880, // A5
+      duration: 0.4,
+      type: "square",
+      volume: 0.7,
+      fadeIn: 0.02,
+      fadeOut: 0.1,
+    });
+  }
+
+  /**
+   * Research complete sound effect - achievement tone
+   */
+  playResearchCompleteSFX() {
+    return this.playSoundEffect("research-complete", {
+      frequency: 659, // E5
+      duration: 0.6,
+      type: "sine",
+      volume: 0.85,
+      fadeIn: 0.08,
+      fadeOut: 0.15,
+    });
+  }
+
+  /**
+   * Event notification sound effect - notification ping
+   */
+  playEventNotificationSFX() {
+    return this.playSoundEffect("event-notification", {
+      frequency: 784, // G5
+      duration: 0.3,
+      type: "sine",
+      volume: 0.7,
+      fadeIn: 0.03,
+      fadeOut: 0.1,
+    });
+  }
+
+  /**
+   * Public API: Play sound effect by name
+   * @param {string} name - Name of the sound effect to play
+   * @returns {Promise<string|null>} Effect ID or null if failed
+   */
+  playSFX(name) {
+    const sfxMap = {
+      "ui-click": () => this.createUIClickEffect(),
+      "mission-launch": () => this.playMissionLaunchSFX(),
+      "mission-complete": () => this.playMissionCompleteSFX(),
+      "budget-warning": () => this.playBudgetWarningSFX(),
+      "research-complete": () => this.playResearchCompleteSFX(),
+      "event-notification": () => this.playEventNotificationSFX(),
+      success: () => this.createSuccessEffect(),
+      error: () => this.createErrorEffect(),
+    };
+
+    if (sfxMap[name]) {
+      return sfxMap[name]();
+    }
+
+    console.warn(`Unknown sound effect: ${name}`);
+    return null;
   }
 
   /**
@@ -437,9 +598,18 @@ class AudioManager {
 
     const masterVol = this.isMuted ? 0 : this.masterVolume;
 
-    this.masterGainNode.gain.setValueAtTime(masterVol, this.audioContext.currentTime);
-    this.musicGainNode.gain.setValueAtTime(this.musicVolume, this.audioContext.currentTime);
-    this.sfxGainNode.gain.setValueAtTime(this.sfxVolume, this.audioContext.currentTime);
+    this.masterGainNode.gain.setValueAtTime(
+      masterVol,
+      this.audioContext.currentTime,
+    );
+    this.musicGainNode.gain.setValueAtTime(
+      this.musicVolume,
+      this.audioContext.currentTime,
+    );
+    this.sfxGainNode.gain.setValueAtTime(
+      this.sfxVolume,
+      this.audioContext.currentTime,
+    );
   }
 
   /**
@@ -450,7 +620,7 @@ class AudioManager {
       masterVolume: this.masterVolume,
       musicVolume: this.musicVolume,
       sfxVolume: this.sfxVolume,
-      isMuted: this.isMuted
+      isMuted: this.isMuted,
     };
   }
 
@@ -465,8 +635,40 @@ class AudioManager {
       ambientDronesCount: this.ambientDrones.length,
       volumes: this.getVolumeSettings(),
       sampleRate: this.audioContext ? this.audioContext.sampleRate : 0,
-      currentTime: this.audioContext ? this.audioContext.currentTime : 0
+      currentTime: this.audioContext ? this.audioContext.currentTime : 0,
     };
+  }
+
+  /**
+   * Public API: Initialize audio manager
+   * Alias for initialize() method
+   */
+  async init() {
+    return this.initialize();
+  }
+
+  /**
+   * Public API: Play ambient music
+   * Alias for startAmbientMusic() method
+   */
+  playMusic() {
+    return this.startAmbientMusic();
+  }
+
+  /**
+   * Public API: Stop ambient music
+   * Alias for stopAmbientMusic() method
+   */
+  stopMusic() {
+    return this.stopAmbientMusic();
+  }
+
+  /**
+   * Public API: Set volume for all audio
+   * @param {number} level - Volume level (0.0 to 1.0)
+   */
+  setVolume(level) {
+    this.setMasterVolume(level);
   }
 
   /**
@@ -475,11 +677,21 @@ class AudioManager {
   destroy() {
     console.log("Destroying AudioManager...");
 
+    // Unsubscribe from EventBus events
+    if (this.eventListeners && this.eventListeners.length > 0) {
+      this.eventListeners.forEach((unsubscribe) => {
+        if (typeof unsubscribe === "function") {
+          unsubscribe();
+        }
+      });
+      this.eventListeners = [];
+    }
+
     // Stop ambient music
     this.stopAmbientMusic();
 
     // Cleanup ambient drones
-    this.ambientDrones.forEach(drone => {
+    this.ambientDrones.forEach((drone) => {
       try {
         drone.oscillator.stop();
         drone.oscillator.disconnect();
@@ -510,7 +722,8 @@ class AudioManager {
 
     // Reset state
     this.isInitialized = false;
-    this.contextState = 'suspended';
+    this.contextState = "suspended";
+    this.eventBus = null;
 
     console.log("AudioManager destroyed");
   }
