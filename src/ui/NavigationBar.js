@@ -28,31 +28,30 @@ class NavigationBar {
    */
   createNavBar() {
     // Create nav container
-    this.navElement = document.createElement('div');
-    this.navElement.id = 'navigation-bar';
-    this.navElement.className = 'navigation-bar';
+    this.navElement = document.createElement("div");
+    this.navElement.id = "navigation-bar";
+    this.navElement.className = "navigation-bar";
 
     // Scene navigation buttons
     const sceneConfigs = [
-      { id: 'dashboard', label: 'Dashboard', sceneId: 'dashboard' },
-      { id: 'missions', label: 'Missions', sceneId: 'missions' },
-      { id: 'crew', label: 'Crew', sceneId: 'crew' },
-      { id: 'research', label: 'Research', sceneId: 'research' },
+      { id: "dashboard", label: "Dashboard", sceneId: "dashboard" },
+      { id: "missions", label: "Missions", sceneId: "missions" },
+      { id: "crew", label: "Crew", sceneId: "crew" },
+      { id: "research", label: "Research", sceneId: "research" },
     ];
 
     sceneConfigs.forEach((config) => {
-      const button = document.createElement('button');
+      const button = document.createElement("button");
       button.id = config.id;
-      button.className = 'nav-button';
+      button.className = "nav-button";
       button.textContent = config.label;
       button.dataset.sceneId = config.sceneId;
-      button.addEventListener('click', (e) => this.handleNavClick(e));
       this.navElement.appendChild(button);
       this.navButtons.push(button);
     });
 
     // Append to body if not already in DOM
-    if (!document.getElementById('navigation-bar')) {
+    if (!document.getElementById("navigation-bar")) {
       document.body.appendChild(this.navElement);
     }
   }
@@ -62,7 +61,7 @@ class NavigationBar {
    */
   attachEventListeners() {
     this.navButtons.forEach((button) => {
-      button.addEventListener('click', (e) => {
+      button.addEventListener("click", (e) => {
         this.handleNavClick(e);
       });
     });
@@ -74,7 +73,7 @@ class NavigationBar {
    */
   handleNavClick(event) {
     const sceneId = event.target.dataset.sceneId;
-    if (typeof this.onNavigate === 'function') {
+    if (typeof this.onNavigate === "function") {
       this.onNavigate(sceneId);
     }
   }
@@ -88,9 +87,9 @@ class NavigationBar {
 
     // Update button styling
     this.navButtons.forEach((button) => {
-      button.classList.remove('nav-button--active');
+      button.classList.remove("nav-button--active");
       if (button.dataset.sceneId === sceneId) {
-        button.classList.add('nav-button--active');
+        button.classList.add("nav-button--active");
       }
     });
   }
@@ -108,7 +107,7 @@ class NavigationBar {
    */
   show() {
     if (this.navElement) {
-      this.navElement.classList.remove('hidden');
+      this.navElement.classList.remove("hidden");
     }
   }
 
@@ -117,7 +116,7 @@ class NavigationBar {
    */
   hide() {
     if (this.navElement) {
-      this.navElement.classList.add('hidden');
+      this.navElement.classList.add("hidden");
     }
   }
 
@@ -127,7 +126,7 @@ class NavigationBar {
   cleanup() {
     // Remove event listeners
     this.navButtons.forEach((button) => {
-      button.removeEventListener('click', null);
+      button.removeEventListener("click", null);
     });
 
     // Remove nav bar from DOM
@@ -140,7 +139,7 @@ class NavigationBar {
     this.navButtons = [];
     this.currentActiveScene = null;
     this.onNavigate = null;
-    console.log('NavigationBar cleaned up');
+    console.log("NavigationBar cleaned up");
   }
 }
 
