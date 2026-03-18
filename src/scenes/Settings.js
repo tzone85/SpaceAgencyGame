@@ -4,6 +4,7 @@
  */
 
 import { createButton, createToast, showToast } from "../ui/components.js";
+import { GameState } from "../game/GameState.js";
 
 export class Settings {
   constructor(gameInstance = null) {
@@ -102,9 +103,7 @@ export class Settings {
 
     const success = this.gameInstance.manualSave();
     const toast = createToast({
-      message: success
-        ? "Game saved successfully!"
-        : "Failed to save game",
+      message: success ? "Game saved successfully!" : "Failed to save game",
       type: success ? "success" : "error",
       duration: 3000,
     });
@@ -137,9 +136,7 @@ export class Settings {
     }
 
     // Load the saved state
-    this.gameInstance.gameState = new (
-      require("../game/GameState.js").GameState
-    )(savedData);
+    this.gameInstance.gameState = new GameState(savedData);
     const toast = createToast({
       message: "Game loaded successfully!",
       type: "success",
