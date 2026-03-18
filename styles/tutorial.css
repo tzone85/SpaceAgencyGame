@@ -1,0 +1,224 @@
+/**
+ * Tutorial Scene Styles
+ *
+ * Glassmorphism tooltip styling and spotlight overlay effects
+ */
+
+/* Tutorial scene container */
+.tutorial-scene {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9000;
+  pointer-events: none;
+}
+
+/* Overlay with spotlight canvas */
+.tutorial-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 9001;
+  pointer-events: auto;
+}
+
+/* Spotlight canvas for drawing the spotlight effect */
+.tutorial-spotlight-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: block;
+  z-index: 9001;
+}
+
+/* Tooltip with glassmorphism effect */
+.tutorial-tooltip {
+  position: fixed;
+  z-index: 9002;
+  max-width: 400px;
+  pointer-events: auto;
+  animation: tooltipSlideIn 0.3s ease-out;
+}
+
+@keyframes tooltipSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Tooltip content container with glassmorphism */
+.tooltip-content {
+  background: rgba(20, 20, 30, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow:
+    0 8px 32px 0 rgba(31, 38, 135, 0.37),
+    inset 0 1px 2px rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+/* Tooltip title */
+.tooltip-title {
+  margin: 0 0 12px 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #00ffff;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+  letter-spacing: 0.5px;
+}
+
+/* Tooltip description text */
+.tooltip-description {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #c0c0c0;
+  font-weight: 400;
+}
+
+/* Button container */
+.tooltip-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+}
+
+/* Button base styles */
+.tooltip-button {
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  outline: none;
+}
+
+.tooltip-button:active {
+  transform: scale(0.98);
+}
+
+/* Skip button - subtle style */
+.tutorial-skip-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #a0a0a0;
+  transition: all 0.2s ease;
+}
+
+.tutorial-skip-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #e0e0e0;
+}
+
+.tutorial-skip-btn:focus {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Next button - primary action */
+.tutorial-next-btn {
+  background: linear-gradient(135deg, #0088ff 0%, #00ccff 100%);
+  border: 1px solid rgba(0, 200, 255, 0.4);
+  color: #ffffff;
+  box-shadow:
+    0 4px 15px rgba(0, 136, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  font-weight: 700;
+}
+
+.tutorial-next-btn:hover {
+  background: linear-gradient(135deg, #0099ff 0%, #00ddff 100%);
+  box-shadow:
+    0 6px 20px rgba(0, 136, 255, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.tutorial-next-btn:focus {
+  box-shadow:
+    0 6px 20px rgba(0, 136, 255, 0.5),
+    0 0 20px rgba(0, 200, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+/* Complete button - final action */
+.tutorial-complete-btn {
+  background: linear-gradient(135deg, #00dd88 0%, #00ff99 100%);
+  border: 1px solid rgba(0, 220, 136, 0.4);
+  color: #ffffff;
+  box-shadow:
+    0 4px 15px rgba(0, 221, 136, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.tutorial-complete-btn:hover {
+  background: linear-gradient(135deg, #00ee99 0%, #00ffaa 100%);
+  box-shadow:
+    0 6px 20px rgba(0, 221, 136, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Responsive styling for mobile */
+@media (max-width: 768px) {
+  .tutorial-tooltip {
+    max-width: 90vw;
+    margin: 0 5vw;
+  }
+
+  .tooltip-content {
+    padding: 20px;
+  }
+
+  .tooltip-title {
+    font-size: 18px;
+  }
+
+  .tooltip-description {
+    font-size: 13px;
+  }
+
+  .tooltip-button {
+    flex: 1;
+    padding: 12px 16px;
+  }
+}
+
+/* Keyboard focus outline - accessibility */
+.tutorial-tooltip:focus-within .tooltip-button:focus {
+  outline: 2px solid #00ffff;
+  outline-offset: 2px;
+}
+
+/* Animation for spotlight glow effect */
+@keyframes spotlightPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.4));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(0, 255, 255, 0.6));
+  }
+}
+
+.tutorial-spotlight-canvas {
+  animation: spotlightPulse 2s ease-in-out infinite;
+}
