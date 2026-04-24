@@ -838,4 +838,13 @@ describe('CrewSystem', () => {
       crewSystem.updateMorale('neil_armstrong', 10);
 
       // Mission completes
-      EventBus.getInstance().emit('mission:completed',
+      EventBus.getInstance().emit('mission:completed', {
+        missionId: 'iss-resupply',
+      });
+
+      // Verify crew was unassigned after mission
+      const unassigned = crewSystem.getUnassignedCrew();
+      expect(unassigned.length).toBeGreaterThan(0);
+    });
+  });
+});
