@@ -880,3 +880,346 @@ small {
     opacity: 1;
   }
 }
+
+/* ============================================================================
+   13. EVENT CARD STYLES
+   ============================================================================ */
+
+.ui-event-card-container {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
+  max-width: 600px;
+  z-index: 1000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.ui-event-card {
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 2px solid var(--color-accent-cyan);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3);
+  padding: var(--space-lg);
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all var(--transition-base);
+  pointer-events: auto;
+}
+
+.ui-event-card.ui-event-card-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Event card variants */
+.ui-event-card--info {
+  border-color: var(--color-accent-cyan);
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3);
+}
+
+.ui-event-card--warning {
+  border-color: var(--color-warning);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.3);
+}
+
+.ui-event-card--danger {
+  border-color: var(--color-danger);
+  box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3);
+}
+
+.ui-event-card--success {
+  border-color: var(--color-success);
+  box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+}
+
+.ui-event-card-header {
+  margin-bottom: var(--space-md);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  padding-bottom: var(--space-md);
+}
+
+.ui-event-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: var(--color-text-primary);
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+  margin: 0;
+}
+
+.ui-event-card-description {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-lg);
+  line-height: 1.6;
+}
+
+.ui-event-card-choices {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+.ui-event-card-choices button {
+  flex: 1;
+  min-width: 120px;
+}
+
+/* ============================================================================
+   14. UI BUTTON STYLES
+   ============================================================================ */
+
+.ui-button {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-base);
+  font-family: inherit;
+  text-transform: uppercase;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-button:focus {
+  outline: 2px solid rgba(0, 212, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.ui-button--primary {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(212, 0, 255, 0.1));
+  color: var(--color-accent-cyan);
+  border: 2px solid var(--color-accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2), inset 0 0 10px rgba(0, 212, 255, 0.1);
+}
+
+.ui-button--primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(212, 0, 255, 0.2));
+  color: #ffffff;
+  border-color: rgba(0, 212, 255, 0.8);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.4), inset 0 0 15px rgba(0, 212, 255, 0.2);
+  transform: scale(1.02);
+}
+
+.ui-button--primary:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.ui-button--secondary {
+  background: rgba(0, 212, 255, 0.05);
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+}
+
+.ui-button--secondary:hover:not(:disabled) {
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--color-accent-cyan);
+  border-color: var(--color-accent-cyan);
+  box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+}
+
+.ui-button--danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+  border: 1px solid var(--color-danger);
+}
+
+.ui-button--danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+}
+
+.ui-button--disabled,
+.ui-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================================================================
+   15. UI MODAL STYLES
+   ============================================================================ */
+
+.ui-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  opacity: 1;
+  transition: opacity var(--transition-base);
+}
+
+.ui-modal-overlay.ui-modal-closing {
+  opacity: 0;
+}
+
+.ui-modal-dialog {
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 2px solid var(--color-accent-cyan);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0, 212, 255, 0.3);
+  max-width: 500px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  animation: modalIn var(--transition-base) ease-out;
+}
+
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.ui-modal-header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ui-modal-title {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.ui-modal-close {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-modal-close:hover {
+  color: var(--color-accent-cyan);
+}
+
+.ui-modal-body {
+  padding: var(--space-lg);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.ui-modal-footer {
+  padding: var(--space-lg);
+  border-top: 1px solid rgba(0, 212, 255, 0.2);
+  display: flex;
+  gap: var(--space-md);
+  justify-content: flex-end;
+}
+
+/* ============================================================================
+   16. UI TOAST STYLES
+   ============================================================================ */
+
+.ui-toast-container {
+  position: fixed;
+  bottom: 60px;
+  right: var(--space-lg);
+  z-index: 950;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  pointer-events: none;
+}
+
+.ui-toast {
+  background: var(--color-glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--color-accent-cyan);
+  border-radius: var(--radius-md);
+  padding: var(--space-md) var(--space-lg);
+  color: var(--color-text-secondary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  opacity: 0;
+  transform: translateX(400px);
+  transition: all var(--transition-base);
+  pointer-events: auto;
+  box-shadow: var(--shadow-glass);
+}
+
+.ui-toast.ui-toast-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.ui-toast--success {
+  border-color: var(--color-success);
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.2);
+}
+
+.ui-toast--warning {
+  border-color: var(--color-warning);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.2);
+}
+
+.ui-toast--error {
+  border-color: var(--color-danger);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.2);
+}
+
+.ui-toast--info {
+  border-color: var(--color-info);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+}
+
+.ui-toast-content {
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.ui-toast-close {
+  background: none;
+  border: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast);
+}
+
+.ui-toast-close:hover {
+  color: var(--color-accent-cyan);
+}
