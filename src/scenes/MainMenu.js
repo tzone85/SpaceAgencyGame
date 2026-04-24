@@ -124,12 +124,12 @@ class MainMenu {
       { id: "newGameBtn", label: "NEW GAME", action: "newGame" },
     ];
 
-    // Conditionally add Continue button if save exists
+    // Conditionally add Load Game button if save exists
     if (hasSave) {
       buttonConfigs.push({
-        id: "continueBtn",
-        label: "CONTINUE GAME",
-        action: "continueGame",
+        id: "loadGameBtn",
+        label: "LOAD GAME",
+        action: "loadGame",
       });
     }
 
@@ -186,11 +186,12 @@ class MainMenu {
         }
         console.log("New Game clicked");
         break;
-      case "continueGame":
+      case "loadGame":
+      case "continueGame": // Support both for backwards compatibility
         if (typeof this.onContinueGame === "function") {
           this.onContinueGame();
         }
-        console.log("Continue Game clicked");
+        console.log("Load Game clicked");
         break;
       case "settings":
         if (typeof this.onSettings === "function") {
