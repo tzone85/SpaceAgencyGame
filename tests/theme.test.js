@@ -7,9 +7,8 @@
 
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+// Get project root: tests/ is in the project root, so go up one level
 const projectRoot = path.resolve(__dirname, "..");
 
 describe("Theme & Glassmorphism Styles - CSS File Verification", () => {
