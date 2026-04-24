@@ -100,11 +100,11 @@ describe("MainMenu Scene", () => {
       expect(settingsBtn.dataset.action).toBe("settings");
     });
 
-    test("should NOT show Continue button when no save exists", () => {
-      const continueBtn = mainMenu.buttons.find(
-        (btn) => btn.id === "continueBtn",
+    test("should NOT show Load Game button when no save exists", () => {
+      const loadGameBtn = mainMenu.buttons.find(
+        (btn) => btn.id === "loadGameBtn",
       );
-      expect(continueBtn).toBeUndefined();
+      expect(loadGameBtn).toBeUndefined();
     });
   });
 
@@ -123,13 +123,13 @@ describe("MainMenu Scene", () => {
       expect(mockCallback).toHaveBeenCalledTimes(1);
     });
 
-    test("should trigger onContinueGame callback when Continue Game button is clicked", () => {
+    test("should trigger onContinueGame callback when Load Game button is clicked", () => {
       // This test only applies when there's a save file
       const saveName = "stellar-horizon-save";
       if (!localStorage.getItem(saveName)) {
         // Skip test if no save file exists
         expect(
-          mainMenu.buttons.find((b) => b.id === "continueBtn"),
+          mainMenu.buttons.find((b) => b.id === "loadGameBtn"),
         ).toBeUndefined();
         return;
       }
@@ -137,10 +137,10 @@ describe("MainMenu Scene", () => {
       const mockCallback = jest.fn();
       mainMenu.setOnContinueGame(mockCallback);
 
-      const continueBtn = mainMenu.buttons.find((b) => b.id === "continueBtn");
-      expect(continueBtn).toBeDefined();
+      const loadGameBtn = mainMenu.buttons.find((b) => b.id === "loadGameBtn");
+      expect(loadGameBtn).toBeDefined();
 
-      mainMenu.handleButtonClick({ target: continueBtn });
+      mainMenu.handleButtonClick({ target: loadGameBtn });
 
       expect(mockCallback).toHaveBeenCalledTimes(1);
     });
@@ -155,7 +155,7 @@ describe("MainMenu Scene", () => {
       expect(mockCallback).toHaveBeenCalledTimes(1);
     });
 
-    test("should show Continue button when save exists", () => {
+    test("should show Load Game button when save exists", () => {
       mainMenu.cleanup();
       // Simulate a save existing
       localStorage.setItem(
@@ -166,14 +166,14 @@ describe("MainMenu Scene", () => {
       mainMenu = new MainMenu();
       mainMenu.initialize();
 
-      const continueBtn = mainMenu.buttons.find(
-        (btn) => btn.id === "continueBtn",
+      const loadGameBtn = mainMenu.buttons.find(
+        (btn) => btn.id === "loadGameBtn",
       );
-      expect(continueBtn).toBeDefined();
-      expect(continueBtn.textContent).toBe("CONTINUE GAME");
+      expect(loadGameBtn).toBeDefined();
+      expect(loadGameBtn.textContent).toBe("LOAD GAME");
     });
 
-    test("should trigger onContinueGame callback when Continue button is clicked", () => {
+    test("should trigger onContinueGame callback when Load Game button is clicked", () => {
       mainMenu.cleanup();
       // Simulate a save existing
       localStorage.setItem(
@@ -187,16 +187,16 @@ describe("MainMenu Scene", () => {
       const mockCallback = jest.fn();
       mainMenu.setOnContinueGame(mockCallback);
 
-      // Get the Continue button - should be second button
-      const continueBtn = mainMenu.buttons.find(
-        (btn) => btn.id === "continueBtn",
+      // Get the Load Game button - should be second button
+      const loadGameBtn = mainMenu.buttons.find(
+        (btn) => btn.id === "loadGameBtn",
       );
 
-      expect(continueBtn).toBeDefined();
-      expect(continueBtn.dataset.action).toBe("continueGame");
+      expect(loadGameBtn).toBeDefined();
+      expect(loadGameBtn.dataset.action).toBe("loadGame");
 
       // Directly call the handler with a mock event
-      mainMenu.handleButtonClick({ target: continueBtn });
+      mainMenu.handleButtonClick({ target: loadGameBtn });
 
       expect(mockCallback).toHaveBeenCalledTimes(1);
     });
@@ -405,6 +405,138 @@ describe("MainMenu Scene", () => {
       mainMenu.initialize();
 
       expect(mainMenu.eventBus).not.toBeNull();
+    });
+
+    test("should properly detect when a save exists", () => {
+      mainMenu.cleanup();
+      localStorage.clear();
+
+      mainMenu = new MainMenu();
+      mainMenu.initialize();
+      let hasLoadBtn = mainMenu.buttons.find((b) => b.id === "loadGameBtn");
+      expect(hasLoadBtn).toBeUndefined();
+
+      mainMenu.cleanup();
+      localStorage.setItem(
+        "stellar-horizon-save",
+        JSON.stringify({ meta: { saveVersion: 1 } }),
+      );
+
+      mainMenu = new MainMenu();
+      mainMenu.initialize();
+      hasLoadBtn = mainMenu.buttons.find((b) => b.id === "loadGameBtn");
+      expect(hasLoadBtn).toBeDefined();
+      expect(hasLoadBtn.textContent).toBe("LOAD GAME");
+    });
+
+    test("should provide access to SaveSystem for state restoration", () => {
+      mainMenu.initialize();
+
+      const testState = {
+        agency: { name: "Test Agency", reputation: 100 },
+        meta: { saveVersion: 1, lastSaved: new Date().toISOString() },
+      };
+
+      const result = mainMenu.saveSystem.save(testState);
+      expect(result).toBe(true);
+
+      const loaded = mainMenu.saveSystem.load();
+      expect(loaded).toEqual(testState);
+    });
+
+    test("should clear save when requested through SaveSystem", () => {
+      mainMenu.initialize();
+
+      const testState = {
+        meta: { saveVersion: 1, lastSaved: new Date().toISOString() },
+      };
+
+      mainMenu.saveSystem.save(testState);
+      expect(mainMenu.saveSystem.hasSave()).toBe(true);
+
+      mainMenu.saveSystem.clear();
+      expect(mainMenu.saveSystem.hasSave()).toBe(false);
+    });
+  });
+
+  describe("New Game Button", () => {
+    test("should have New Game button that always appears", () => {
+      mainMenu.initialize();
+
+      const newGameBtn = mainMenu.buttons.find((b) => b.id === "newGameBtn");
+      expect(newGameBtn).toBeDefined();
+      expect(newGameBtn.textContent).toBe("NEW GAME");
+    });
+
+    test("should trigger onNewGame callback when New Game is clicked", () => {
+      mainMenu.initialize();
+
+      const mockCallback = jest.fn();
+      mainMenu.setOnNewGame(mockCallback);
+
+      const newGameBtn = mainMenu.buttons.find((b) => b.id === "newGameBtn");
+      newGameBtn.click();
+
+      expect(mockCallback).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("Load Game Button", () => {
+    test("should conditionally show Load Game button only when save exists", () => {
+      // Without save
+      mainMenu.cleanup();
+      localStorage.clear();
+      mainMenu = new MainMenu();
+      mainMenu.initialize();
+
+      let loadGameBtn = mainMenu.buttons.find((b) => b.id === "loadGameBtn");
+      expect(loadGameBtn).toBeUndefined();
+
+      // With save
+      mainMenu.cleanup();
+      localStorage.setItem(
+        "stellar-horizon-save",
+        JSON.stringify({ meta: { saveVersion: 1 } }),
+      );
+
+      mainMenu = new MainMenu();
+      mainMenu.initialize();
+
+      loadGameBtn = mainMenu.buttons.find((b) => b.id === "loadGameBtn");
+      expect(loadGameBtn).toBeDefined();
+    });
+
+    test("should trigger onContinueGame callback for Load Game action", () => {
+      mainMenu.cleanup();
+      localStorage.setItem(
+        "stellar-horizon-save",
+        JSON.stringify({ meta: { saveVersion: 1 } }),
+      );
+
+      mainMenu = new MainMenu();
+      mainMenu.initialize();
+
+      const mockCallback = jest.fn();
+      mainMenu.setOnContinueGame(mockCallback);
+
+      const loadGameBtn = mainMenu.buttons.find((b) => b.id === "loadGameBtn");
+      loadGameBtn.click();
+
+      expect(mockCallback).toHaveBeenCalledTimes(1);
+    });
+
+    test("should support backwards compatibility with continueGame action", () => {
+      mainMenu.initialize();
+
+      const mockCallback = jest.fn();
+      mainMenu.setOnContinueGame(mockCallback);
+
+      // Test that continueGame action still works
+      mainMenu.handleButtonClick({
+        target: { dataset: { action: "continueGame" } },
+      });
+
+      expect(mockCallback).toHaveBeenCalledTimes(1);
     });
   });
 });
