@@ -3,9 +3,11 @@
  *
  * Manages the complete launch sequence experience including countdown timer,
  * audio cues, rocket animation, and mission departure visualization.
+ * Integrates with MissionSystem via EventBus to listen for mission:started events.
  */
 
 import LaunchAnim from '../canvas/LaunchAnim.js';
+import EventBus from '../game/EventBus.js';
 
 class LaunchSequence {
   constructor(engine) {
@@ -33,6 +35,7 @@ class LaunchSequence {
     // Mission parameters
     this.missionData = null;
     this.launchOutcome = 'success'; // Default to success, can be overridden
+    this.missionId = null;
 
     // UI elements
     this.uiElements = {
@@ -50,8 +53,12 @@ class LaunchSequence {
     this.onLaunchComplete = null;
     this.onReturnToMissionTracking = null;
 
+    // Event bus for mission integration
+    this.eventBus = EventBus.getInstance();
+
     this.initializeAudio();
     this.initializeUI();
+    this.subscribeMissionEvents();
   }
 
   /**
@@ -151,6 +158,40 @@ class LaunchSequence {
     this.uiElements.missionInfo = missionInfoDiv;
     this.uiElements.statusText = statusTextDiv;
     this.uiOverlay = uiOverlay;
+  }
+
+  /**
+   * Subscribe to mission events from EventBus
+   * @private
+   */
+  subscribeMissionEvents() {
+    if (!this.eventBus) return;
+
+    // Listen for mission start events from MissionSystem
+    this.eventBus.subscribe('mission:started', this.#onMissionStarted, this);
+  }
+
+  /**
+   * Handle mission:started event
+   * @private
+   */
+  #onMissionStarted = (eventData) => {
+    if (!eventData) return;
+
+    const { missionId, missionName, crewIds = [], duration } = eventData;
+
+    // Prepare mission data for launch sequence
+    const missionData = {
+      name: missionName || 'Mission',
+      destination: 'Target Destination',
+      payload: 'Standard Payload',
+      crew: crewIds.length,
+      duration: duration ? `${Math.ceil(duration)} hours` : 'Unknown'
+    };
+
+    // Start launch sequence automatically when mission is started
+    this.missionId = missionId;
+    this.startLaunchSequence(missionData, 'success');
   }
 
   /**
@@ -608,6 +649,11 @@ class LaunchSequence {
    */
   destroy() {
     this.endLaunchSequence();
+
+    // Unsubscribe from mission events
+    if (this.eventBus) {
+      this.eventBus.unsubscribe('mission:started', this.#onMissionStarted, this);
+    }
 
     // Clean up launch animation
     if (this.launchAnim) {
