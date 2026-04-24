@@ -1,7 +1,11 @@
 export default {
   testEnvironment: "jsdom",
-  transform: {},
-  moduleNameMapper: {},
+  transform: {
+    "^.+\\.js$": ["babel-jest", { rootMode: "upward" }],
+  },
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
   testMatch: ["**/tests/**/*.test.js"],
   testPathIgnorePatterns: ["/node_modules/", "/dist/"],
   setupFiles: ["<rootDir>/tests/setup-globals.js"],

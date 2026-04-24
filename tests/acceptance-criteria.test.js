@@ -5,10 +5,8 @@
 
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const projectRoot = path.join(__dirname, "..");
+const projectRoot = path.resolve(__dirname, "..");
 
 describe("Story 01KKVMGT-s-001 - Project Setup & Directory Structure", () => {
   describe("Acceptance Criteria 1: Package.json exists with vite and necessary dependencies", () => {
