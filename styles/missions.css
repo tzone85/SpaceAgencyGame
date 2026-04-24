@@ -1,5 +1,261 @@
 /* Mission Control Scene Styles */
 
 .mission-control {
-  /* Mission control specific styles */
+  padding: 2rem;
+  background: linear-gradient(135deg, #0a1428 0%, #1a2332 100%);
+  min-height: 100vh;
+  font-family: 'Arial', sans-serif;
+  color: #e0e0e0;
+}
+
+.mission-control__header {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #00d4ff;
+}
+
+.mission-control__title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: #00d4ff;
+  text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+.mission-control__section {
+  margin-bottom: 3rem;
+}
+
+.mission-control__section-title {
+  font-size: 1.5rem;
+  color: #00d4ff;
+  margin: 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+  letter-spacing: 1px;
+}
+
+.mission-control__missions-list,
+.mission-control__completed-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+  gap: 1.5rem;
+}
+
+.mission-control__empty {
+  padding: 2rem;
+  text-align: center;
+  color: #888;
+  font-style: italic;
+  grid-column: 1 / -1;
+}
+
+/* Mission Card Styles */
+.mission-card {
+  background: linear-gradient(135deg, #1a2940 0%, #0d1a2d 100%);
+  border: 2px solid #00d4ff;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.mission-card:hover {
+  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.4);
+  border-color: #00ffff;
+}
+
+.mission-card--completed {
+  border-color: #4caf50;
+  background: linear-gradient(135deg, #1a2d1a 0%, #0d2d0d 100%);
+}
+
+.mission-card--completed:hover {
+  box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+}
+
+.mission-card__header {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.mission-card__title {
+  font-size: 1.3rem;
+  color: #00ffff;
+  margin: 0 0 0.5rem 0;
+  font-weight: bold;
+}
+
+.mission-card__status {
+  font-size: 0.9rem;
+  color: #00d4ff;
+  font-weight: 500;
+}
+
+.mission-card__status--success {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.mission-card__status--failure {
+  color: #ff6b6b;
+  font-weight: bold;
+}
+
+/* Phase Progress */
+.mission-card__phases {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mission-card__phase {
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.mission-card__phase--completed {
+  opacity: 1;
+}
+
+.mission-card__phase-label {
+  font-size: 0.85rem;
+  color: #b0b0b0;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Progress Bar Base */
+.progress-bar {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  border-radius: 4px;
+  height: 24px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar--small {
+  height: 20px;
+}
+
+.progress-bar__fill {
+  background: linear-gradient(90deg, #00d4ff 0%, #00ffff 50%, #00d4ff 100%);
+  height: 100%;
+  transition: width 0.3s ease;
+  box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.progress-bar__text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 0.75rem;
+  color: #000;
+  font-weight: bold;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.3);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.progress-bar__text--small {
+  font-size: 0.7rem;
+}
+
+/* Overall Progress */
+.mission-card__overall {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 212, 255, 0.2);
+}
+
+.mission-card__overall-label {
+  font-size: 0.9rem;
+  color: #00d4ff;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+/* Completed Mission Details */
+.mission-card__details {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(76, 175, 80, 0.2);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.mission-card__outcome {
+  font-size: 0.9rem;
+  color: #e0e0e0;
+  font-style: italic;
+}
+
+.mission-card__funding {
+  font-size: 0.9rem;
+  color: #4caf50;
+}
+
+.mission-card__reputation {
+  font-size: 0.9rem;
+}
+
+.mission-card__reputation--positive {
+  color: #4caf50;
+}
+
+.mission-card__reputation--negative {
+  color: #ff6b6b;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .mission-control__missions-list,
+  .mission-control__completed-list {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .mission-control {
+    padding: 1rem;
+  }
+
+  .mission-control__title {
+    font-size: 1.8rem;
+  }
+
+  .mission-control__missions-list,
+  .mission-control__completed-list {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-card {
+    padding: 1rem;
+  }
+}
+
+/* Animation for phase completion */
+@keyframes phaseComplete {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.mission-card__phase--completed {
+  animation: phaseComplete 0.5s ease;
 }
