@@ -1,7 +1,8 @@
 /**
  * MissionSystem - Manages game mission lifecycle
  *
- * Handles mission launching, progress tracking, and completion.
+ * Handles mission launching, progress tracking, and completion with full mission phases.
+ * Phases: Planning → Preparation → Launch → Transit → Arrival → Return
  * Integrates with GameState for persistence and EventBus for communication.
  * Listens for mission:launch and game:tick events.
  * Emits mission:started, mission:completed, budget:deduct, and state:changed events.
@@ -11,12 +12,34 @@
  * - launchMission(missionId: string, crewIds: string[]) → boolean — start mission
  * - updateProgress(deltaTime: number) → void — advance active missions
  * - completeMission(missionId: string) → void — resolve outcome, apply rewards
+ * - getMissionPhase(missionId: string) → string — get current phase
+ * - getMissionProgress(missionId: string) → object — get phase progress and details
  */
 
 import {
   getMissionById,
   getMissionsByTier as getMissionsByTierData,
 } from "../data/missions.js";
+
+// Mission phases in order
+const MISSION_PHASES = [
+  "Planning",
+  "Preparation",
+  "Launch",
+  "Transit",
+  "Arrival",
+  "Return"
+];
+
+// Phase duration weights (as percentage of total mission duration)
+const PHASE_DURATIONS = {
+  Planning: 0.10,      // 10%
+  Preparation: 0.15,   // 15%
+  Launch: 0.05,        // 5%
+  Transit: 0.50,       // 50%
+  Arrival: 0.15,       // 15%
+  Return: 0.05         // 5%
+};
 
 class MissionSystem {
   #eventBus;
@@ -131,7 +154,7 @@ class MissionSystem {
         throw new Error(`Mission is already active: ${missionId}`);
       }
 
-      // Create mission progress entry
+      // Create mission progress entry with phase information
       const missionProgress = {
         missionId,
         mission,
@@ -139,6 +162,16 @@ class MissionSystem {
         elapsed: 0,
         status: "active",
         startedAt: Date.now(),
+        currentPhaseIndex: 0,
+        currentPhase: MISSION_PHASES[0],
+        phasesProgress: MISSION_PHASES.map(phase => ({
+          phase,
+          duration: PHASE_DURATIONS[phase] * mission.duration * 86400, // Convert days to seconds
+          elapsed: 0,
+          completed: false
+        })),
+        outcome: null,
+        success: null,
       };
 
       this.#activeMissions.set(missionId, missionProgress);
@@ -234,6 +267,9 @@ class MissionSystem {
         const newElapsed = activeMission.elapsed + deltaTime;
         const durationInSeconds = mission.duration * 86400; // Convert days to seconds
 
+        // Update phases
+        this.#updateMissionPhases(missionProgress, deltaTime);
+
         if (newElapsed >= durationInSeconds) {
           // Mission is complete
           completedMissionIds.push(missionId);
@@ -287,6 +323,11 @@ class MissionSystem {
       const { mission, crewIds } = missionProgress;
       const state = this.#gameState.getState();
 
+      // Calculate mission outcome
+      const outcome = this.#calculateMissionOutcome(missionProgress, state);
+      missionProgress.outcome = outcome;
+      missionProgress.success = outcome.success;
+
       // Remove from active missions
       const activeMissions = (state.missions.active || []).filter(
         (m) => m.missionId !== missionId,
@@ -301,7 +342,10 @@ class MissionSystem {
         crewIds,
         completedAt: Date.now(),
         cost: mission.cost,
-        revenue: Math.floor(mission.cost * 1.5), // 50% return for example
+        revenue: outcome.funding,
+        success: outcome.success,
+        outcome: outcome.reason,
+        reputation: outcome.reputation,
       });
       this.#gameState.update("missions.completed", completedMissions);
 
@@ -309,9 +353,13 @@ class MissionSystem {
       const currentReputation = state.agency.reputation || 50;
       const newReputation = Math.min(
         100,
-        currentReputation + Math.floor(mission.successRate / 10),
+        Math.max(0, currentReputation + outcome.reputation)
       );
       this.#gameState.update("agency.reputation", newReputation);
+
+      // Update budget with mission revenue
+      const newBalance = state.budget.balance + outcome.funding;
+      this.#gameState.update("budget.balance", newBalance);
 
       // Remove from active tracking
       this.#activeMissions.delete(missionId);
@@ -321,12 +369,16 @@ class MissionSystem {
         missionId,
         missionName: mission.name,
         crewIds,
-        successRate: mission.successRate,
+        success: outcome.success,
+        outcome: outcome.reason,
+        funding: outcome.funding,
+        reputation: outcome.reputation,
       });
 
       this.#eventBus.emit("state:changed", {
         change: "mission-completed",
         missionId,
+        success: outcome.success,
       });
     } else {
       // Legacy implementation
@@ -405,6 +457,148 @@ class MissionSystem {
     });
 
     return missionProgress;
+  }
+
+  /**
+   * Get the current phase of a mission
+   * @param {string} missionId - Mission ID
+   * @returns {string|null} Current phase name or null
+   */
+  getMissionPhase(missionId) {
+    const missionProgress = this.#activeMissions.get(missionId);
+    return missionProgress ? missionProgress.currentPhase : null;
+  }
+
+  /**
+   * Get detailed progress information for a mission
+   * @param {string} missionId - Mission ID
+   * @returns {Object|null} Mission progress object with phase details or null
+   */
+  getMissionProgress(missionId) {
+    const missionProgress = this.#activeMissions.get(missionId);
+    if (!missionProgress) {
+      return null;
+    }
+
+    return {
+      missionId,
+      missionName: missionProgress.mission.name,
+      currentPhase: missionProgress.currentPhase,
+      currentPhaseIndex: missionProgress.currentPhaseIndex,
+      phasesProgress: missionProgress.phasesProgress.map(p => ({
+        ...p,
+        progressPercent: p.duration > 0 ? (p.elapsed / p.duration) * 100 : 0
+      })),
+      overallProgress: missionProgress.phasesProgress.reduce((sum, p) => sum + p.elapsed, 0) /
+                       missionProgress.phasesProgress.reduce((sum, p) => sum + p.duration, 0) * 100,
+      outcome: missionProgress.outcome,
+      success: missionProgress.success,
+    };
+  }
+
+  /**
+   * Update phases for a mission based on elapsed time
+   * @private
+   */
+  #updateMissionPhases(missionProgress, deltaTime) {
+    // Distribute deltaTime across current and subsequent phases
+    let remaining = deltaTime;
+    const phasesProgress = missionProgress.phasesProgress;
+
+    for (let i = missionProgress.currentPhaseIndex; i < phasesProgress.length && remaining > 0; i++) {
+      const phase = phasesProgress[i];
+      const phaseRemaining = phase.duration - phase.elapsed;
+
+      if (phaseRemaining <= remaining) {
+        // Phase completes
+        phase.elapsed = phase.duration;
+        phase.completed = true;
+        remaining -= phaseRemaining;
+
+        // Move to next phase
+        if (i + 1 < phasesProgress.length) {
+          missionProgress.currentPhaseIndex = i + 1;
+          missionProgress.currentPhase = phasesProgress[i + 1].phase;
+
+          // Emit phase transition event
+          this.#eventBus.emit("mission:phase-changed", {
+            missionId: missionProgress.missionId,
+            fromPhase: phase.phase,
+            toPhase: phasesProgress[i + 1].phase,
+            phasesCompleted: i + 1,
+            totalPhases: phasesProgress.length,
+          });
+        }
+      } else {
+        // Phase still in progress
+        phase.elapsed += remaining;
+        remaining = 0;
+      }
+    }
+  }
+
+  /**
+   * Calculate mission outcome based on crew skills, technology, and RNG
+   * @private
+   */
+  #calculateMissionOutcome(missionProgress, gameState) {
+    const { mission, crewIds } = missionProgress;
+
+    // Base success rate from mission definition
+    let successProbability = mission.successRate / 100;
+
+    // Add crew skill bonuses
+    const roster = gameState.crew.roster || [];
+    const assignedCrew = roster.filter(crew => crewIds.includes(crew.id));
+
+    if (assignedCrew.length > 0) {
+      // Average crew skill bonus (max +10% from crew skills)
+      const avgCrewSkill = assignedCrew.reduce((sum, crew) => {
+        const avgSkill = (crew.piloting + crew.engineering + crew.science) / 3 / 100;
+        return sum + avgSkill;
+      }, 0) / assignedCrew.length;
+
+      successProbability += Math.min(avgCrewSkill * 0.1, 0.1);
+    }
+
+    // Add technology bonuses
+    const completed = gameState.research?.completed || [];
+    const techBonus = completed.length * 0.02; // Each tech adds 2% success
+    successProbability += Math.min(techBonus, 0.15); // Cap at 15%
+
+    // Apply RNG
+    const roll = Math.random();
+    const success = roll < successProbability;
+
+    // Calculate outcome details
+    const outcome = {
+      success,
+      successRate: successProbability,
+      roll,
+      reason: this.#getOutcomeReason(success, successProbability, roll),
+      reputation: success ? Math.floor(mission.successRate / 10) : -Math.floor(mission.successRate / 20),
+      funding: success ? Math.floor(mission.cost * 1.5) : Math.floor(mission.cost * 0.3),
+    };
+
+    return outcome;
+  }
+
+  /**
+   * Get a human-readable reason for the mission outcome
+   * @private
+   */
+  #getOutcomeReason(success, probability, roll) {
+    const margin = Math.abs(probability - roll);
+
+    if (success) {
+      if (margin < 0.05) return "Mission succeeded by a narrow margin";
+      if (margin < 0.2) return "Mission succeeded";
+      return "Mission succeeded with excellent performance";
+    } else {
+      if (margin < 0.05) return "Mission failed by a narrow margin";
+      if (margin < 0.2) return "Mission encountered critical issues";
+      return "Mission failed catastrophically";
+    }
   }
 
   /**
