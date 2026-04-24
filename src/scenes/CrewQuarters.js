@@ -12,7 +12,7 @@
  */
 
 import EventBus from '../game/EventBus.js';
-import { CREW_ROLES } from '../data/crew.js';
+import { CREW_ROLES, generateProceduralCrew, CREW_ROLES as ROLE_TEMPLATES } from '../data/crew.js';
 
 class CrewQuarters {
   constructor(renderer = null, camera = null, config = {}) {
@@ -51,8 +51,31 @@ class CrewQuarters {
   initialize() {
     this.createSceneUI();
     this.attachEventListeners();
+    this.generateInitialApplicants();
     this.updateCrewDisplay();
     console.log('CrewQuarters scene initialized');
+  }
+
+  /**
+   * Generate initial applicants pool if empty
+   */
+  generateInitialApplicants() {
+    if (this.crewMembers.applicants.length === 0) {
+      const roleIds = Object.values(ROLE_TEMPLATES).map(r => r.id);
+      const applicantCount = 5;
+
+      for (let i = 0; i < applicantCount; i++) {
+        const randomRoleId = roleIds[Math.floor(Math.random() * roleIds.length)];
+        const crew = generateProceduralCrew(randomRoleId);
+        crew.status = 'applicant';
+        // Add individual skill stats
+        crew.stats.piloting = Math.floor(Math.random() * 100);
+        crew.stats.engineering = Math.floor(Math.random() * 100);
+        crew.stats.science = Math.floor(Math.random() * 100);
+        crew.stats.medical = Math.floor(Math.random() * 100);
+        this.crewMembers.applicants.push(crew);
+      }
+    }
   }
 
   /**
@@ -354,8 +377,28 @@ class CrewQuarters {
    * @param {Object} member - Crew member
    */
   handleRecruit(member) {
+    // Move from applicants to roster
+    this.crewMembers.applicants = this.crewMembers.applicants.filter(c => c.id !== member.id);
+    member.status = 'available';
+    this.crewMembers.roster.push(member);
+
+    // Emit recruitment event
     this.eventBus.emit('crew:recruit', { memberId: member.id });
     console.log(`Recruited ${member.firstName} ${member.lastName}`);
+
+    // Generate new applicant to replace the recruited one
+    const roleIds = Object.values(ROLE_TEMPLATES).map(r => r.id);
+    const randomRoleId = roleIds[Math.floor(Math.random() * roleIds.length)];
+    const newApplicant = generateProceduralCrew(randomRoleId);
+    newApplicant.status = 'applicant';
+    // Add individual skill stats
+    newApplicant.stats.piloting = Math.floor(Math.random() * 100);
+    newApplicant.stats.engineering = Math.floor(Math.random() * 100);
+    newApplicant.stats.science = Math.floor(Math.random() * 100);
+    newApplicant.stats.medical = Math.floor(Math.random() * 100);
+    this.crewMembers.applicants.push(newApplicant);
+
+    this.updateCrewDisplay();
   }
 
   /**

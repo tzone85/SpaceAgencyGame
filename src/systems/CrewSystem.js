@@ -65,9 +65,9 @@ class CrewSystem {
    * Initialize event listeners for crew-related events
    */
   initializeEventListeners() {
-    this.eventBus.subscribe("crew:recruit", this.boundOnCrewRecruit);
-    this.eventBus.subscribe("crew:assign", this.boundOnCrewAssign);
-    this.eventBus.subscribe("mission:completed", this.boundOnMissionCompleted);
+    this.eventBus?.subscribe?.("crew:recruit", this.boundOnCrewRecruit);
+    this.eventBus?.subscribe?.("crew:assign", this.boundOnCrewAssign);
+    this.eventBus?.subscribe?.("mission:completed", this.boundOnMissionCompleted);
   }
 
   /**
@@ -226,11 +226,21 @@ class CrewSystem {
    * @returns {Object} The assignment result
    */
   assignToMission(crewId, missionId) {
+    // Validate crew exists
+    if (!this.crewMembers.has(crewId) && !this.state.roster.find(c => c.id === crewId)) {
+      throw new Error(`Crew member ${crewId} not found`);
+    }
+
+    // Check if already assigned
+    const crewMember = this.getCrewMember(crewId);
+    if (crewMember && crewMember.assignedMissionId !== null && crewMember.assignedMissionId !== undefined) {
+      throw new Error(`Crew member ${crewId} already assigned to mission ${crewMember.assignedMissionId}`);
+    }
+
     const result = this.assignToCrew(crewId, missionId);
     if (result === false) {
       throw new Error(`Failed to assign crew member ${crewId} to mission ${missionId}`);
     }
-    const crewMember = this.getCrewMember(crewId);
     return { crewId, missionId, crewMember };
   }
 
@@ -310,7 +320,10 @@ class CrewSystem {
       // Validate skill exists
       const validSkills = Object.keys(CREW_STATS);
       if (!validSkills.includes(program)) {
-        // If not a valid skill, just emit the legacy event
+        if (this.gameState) {
+          throw new Error(`Invalid skill: ${program}`);
+        }
+        // If not a valid skill in legacy mode, just return
         return { crewId, program };
       }
 
@@ -351,6 +364,11 @@ class CrewSystem {
       });
 
       return { crewId, skillName: program, oldLevel, newLevel, crewMember };
+    }
+
+    // Check if crew not found when using new system
+    if (this.gameState && !crew) {
+      throw new Error(`Crew member ${crewId} not found`);
     }
 
     return { crewId, program };
@@ -413,6 +431,11 @@ class CrewSystem {
       return { crewId, oldMorale, newMorale, delta, crewMember };
     }
 
+    // Check if crew not found when using new system
+    if (this.gameState && !crew) {
+      throw new Error(`Crew member ${crewId} not found`);
+    }
+
     return { crewId, delta };
   }
 
@@ -442,14 +465,19 @@ class CrewSystem {
   getCrewByMission(missionId) {
     const crewIds = this.missionAssignments.get(missionId) || new Set();
     const newCrewList = Array.from(crewIds).map((id) => this.crewMembers.get(id)).filter(Boolean);
-    
+
+    // Return new crew list if available, otherwise fall back to legacy
+    if (newCrewList.length > 0 || this.crewMembers.size > 0) {
+      return newCrewList;
+    }
+
     // Also check legacy assigned state
     const legacyAssigned = Object.entries(this.state.assigned)
       .filter(([_, assignedMissionId]) => assignedMissionId === missionId)
       .map(([crewId, _]) => this.state.roster.find(c => c.id === crewId))
       .filter(Boolean);
-    
-    return [...newCrewList, ...legacyAssigned];
+
+    return legacyAssigned;
   }
 
   /**
@@ -488,9 +516,10 @@ class CrewSystem {
    * Handle crew recruit event from EventBus
    */
   onCrewRecruit(data) {
-    if (data && data.crewId) {
+    const crewId = data?.crewId || data?.memberId;
+    if (data && crewId) {
       try {
-        this.recruit(data.crewId);
+        this.recruit(crewId);
       } catch (error) {
         console.error("Error recruiting crew from event:", error);
       }
@@ -501,9 +530,10 @@ class CrewSystem {
    * Handle crew assign event from EventBus
    */
   onCrewAssign(data) {
-    if (data && data.crewId && data.missionId) {
+    const crewId = data?.crewId || data?.memberId;
+    if (data && crewId && data.missionId) {
       try {
-        this.assignToMission(data.crewId, data.missionId);
+        this.assignToMission(crewId, data.missionId);
       } catch (error) {
         console.error("Error assigning crew from event:", error);
       }
@@ -521,31 +551,39 @@ class CrewSystem {
         if (crewMember) {
           const crewId = crewMember.id;
 
-          // Increase experience by 5 points for new crew system
-          if (this.crewMembers.has(crewId)) {
-            crewMember.stats.experience = Math.min(
-              100,
-              crewMember.stats.experience + 5,
-            );
+          // Check mission outcome (success vs failure)
+          const missionSuccess = data.outcome?.success !== false;
 
-            // Increase morale slightly for successful mission
-            this.updateMorale(crewId, 5);
-
-            // Auto-unassign from mission
-            try {
-              this.unassign(crewId);
-            } catch (error) {
-              console.error(
-                `Error unassigning crew ${crewId} after mission:`,
-                error,
+          if (missionSuccess) {
+            // Increase experience by 5 points for new crew system
+            if (this.crewMembers.has(crewId)) {
+              crewMember.stats.experience = Math.min(
+                100,
+                crewMember.stats.experience + 5,
               );
+
+              // Increase morale slightly for successful mission
+              this.updateMorale(crewId, 5);
+
+              // Auto-unassign from mission
+              try {
+                this.unassign(crewId);
+              } catch (error) {
+                console.error(
+                  `Error unassigning crew ${crewId} after mission:`,
+                  error,
+                );
+              }
+            } else {
+              // Legacy crew system - just update morale
+              this.updateMorale(crewId, 5);
+
+              // Remove from legacy assigned state
+              delete this.state.assigned[crewId];
             }
           } else {
-            // Legacy crew system - just update morale
-            this.updateMorale(crewId, 5);
-            
-            // Remove from legacy assigned state
-            delete this.state.assigned[crewId];
+            // Mission failed - handle crew injury/loss
+            this.handleMissionFailure(crewId);
           }
         }
       });
@@ -553,12 +591,72 @@ class CrewSystem {
   }
 
   /**
+   * Handle crew injury or loss from mission failure
+   * @param {string} crewId - Crew member ID
+   */
+  handleMissionFailure(crewId) {
+    if (this.crewMembers.has(crewId)) {
+      const crewMember = this.crewMembers.get(crewId);
+
+      // 50% chance of injury vs loss
+      const isInjured = Math.random() < 0.5;
+
+      if (isInjured) {
+        // Crew is injured - reduce health and morale, mark as recovering
+        crewMember.stats.health = Math.max(0, crewMember.stats.health - 30);
+        crewMember.stats.morale = Math.max(0, crewMember.stats.morale - 20);
+        crewMember.status = 'recovering';
+
+        this.eventBus.emit("crew:injured", {
+          crewId,
+          crewMember,
+          healthLoss: 30,
+          moraleLoss: 20,
+        });
+      } else {
+        // Crew is lost - mark as lost and remove from missions
+        crewMember.status = 'lost';
+        crewMember.assignedMissionId = null;
+        this.crewMissionMap.set(crewId, null);
+
+        this.eventBus.emit("crew:lost", {
+          crewId,
+          crewMember,
+        });
+      }
+
+      this.crewMembers.set(crewId, crewMember);
+
+      // Update GameState
+      if (this.gameState) {
+        this.syncCrewToGameState();
+      }
+
+      // Emit crew updated event
+      this.eventBus.emit("crew:updated", {
+        action: isInjured ? "injured" : "lost",
+        crewId,
+        crewMember,
+      });
+    } else {
+      // Legacy crew system
+      const crew = this.state.roster.find(c => c.id === crewId);
+      if (crew) {
+        crew.health = Math.max(0, crew.health - 30);
+        crew.morale = Math.max(0, crew.morale - 20);
+        crew.status = 'injured';
+      }
+      delete this.state.assigned[crewId];
+    }
+  }
+
+  /**
    * Destroy the crew system and clean up event listeners
    */
   destroy() {
-    this.eventBus.unsubscribe("crew:recruit", this.boundOnCrewRecruit);
-    this.eventBus.unsubscribe("crew:assign", this.boundOnCrewAssign);
-    this.eventBus.unsubscribe(
+    this.eventBus?.unsubscribe?.("crew:recruit", this.boundOnCrewRecruit);
+    this.eventBus?.unsubscribe?.("crew:assign", this.boundOnCrewAssign);
+    this.eventBus?.unsubscribe?.(
       "mission:completed",
       this.boundOnMissionCompleted,
     );
