@@ -551,6 +551,122 @@ function createPanel(options = {}) {
   return panel;
 }
 
+/**
+ * Creates an event notification card element
+ * @param {Object} options - Event card configuration
+ * @param {string} options.id - Event ID
+ * @param {string} options.title - Event title
+ * @param {string} options.description - Event description
+ * @param {Array<Object>} options.choices - Array of choice objects with {id, text}
+ * @param {Function} options.onChoice - Callback when choice is made with (eventId, choiceIndex)
+ * @param {string} options.type - Event type (info, warning, danger, success)
+ * @returns {HTMLElement} The event card element
+ */
+function createEventCard(options = {}) {
+  const {
+    id = '',
+    title = 'Event',
+    description = '',
+    choices = [],
+    onChoice = null,
+    type = 'info'
+  } = options;
+
+  const card = createElement('div', {
+    classes: ['ui-event-card', `ui-event-card--${type}`],
+    id: `event-card-${id}`
+  });
+
+  // Header with title
+  const header = createElement('div', {
+    classes: ['ui-event-card-header']
+  });
+
+  const titleEl = createElement('h3', {
+    classes: ['ui-event-card-title'],
+    text: title
+  });
+  header.appendChild(titleEl);
+
+  // Description
+  const descEl = createElement('p', {
+    classes: ['ui-event-card-description'],
+    text: description
+  });
+
+  // Choices container
+  const choicesContainer = createElement('div', {
+    classes: ['ui-event-card-choices']
+  });
+
+  choices.forEach((choice, index) => {
+    const btn = createButton({
+      text: choice.text,
+      variant: index === 0 ? 'primary' : 'secondary',
+      onClick: () => {
+        if (onChoice) {
+          onChoice(id, index);
+        }
+      }
+    });
+    choicesContainer.appendChild(btn);
+  });
+
+  card.appendChild(header);
+  card.appendChild(descEl);
+  card.appendChild(choicesContainer);
+
+  return card;
+}
+
+/**
+ * Shows an event card notification
+ * @param {HTMLElement} card - The event card element
+ * @param {Function} onDismiss - Optional callback when card is dismissed
+ */
+function showEventCard(card, onDismiss = null) {
+  const container = getEventCardContainer();
+  container.appendChild(card);
+
+  requestAnimationFrame(() => {
+    card.classList.add('ui-event-card-visible');
+  });
+}
+
+/**
+ * Removes an event card notification
+ * @param {HTMLElement} card - The event card element
+ * @param {Function} onDismiss - Optional callback when dismissed
+ */
+function removeEventCard(card, onDismiss = null) {
+  card.classList.remove('ui-event-card-visible');
+
+  setTimeout(() => {
+    card.remove();
+    if (onDismiss) {
+      onDismiss();
+    }
+  }, ANIMATION_TIMING.normal);
+}
+
+/**
+ * Gets or creates the event card container
+ * @returns {HTMLElement} The event card container
+ */
+function getEventCardContainer() {
+  let container = document.getElementById('ui-event-card-container');
+
+  if (!container) {
+    container = createElement('div', {
+      classes: ['ui-event-card-container'],
+      id: 'ui-event-card-container'
+    });
+    document.body.appendChild(container);
+  }
+
+  return container;
+}
+
 export {
   ANIMATION_TIMING,
   createElement,
@@ -568,5 +684,9 @@ export {
   toggleDropdown,
   closeDropdown,
   createBadge,
-  createPanel
+  createPanel,
+  createEventCard,
+  showEventCard,
+  removeEventCard,
+  getEventCardContainer
 };
