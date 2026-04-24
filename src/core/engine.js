@@ -8,7 +8,7 @@
  */
 
 class Engine {
-  constructor() {
+  constructor(eventBus = null) {
     this.frameRate = 60;
     this.frameCount = 0;
     this.deltaTime = 0;
@@ -27,6 +27,9 @@ class Engine {
 
     // Resize handler reference for cleanup
     this.resizeHandler = null;
+
+    // EventBus for emitting game:tick events
+    this.eventBus = eventBus;
   }
 
   /**
@@ -110,6 +113,14 @@ class Engine {
   }
 
   /**
+   * Set the EventBus instance for emitting game:tick events
+   * @param {EventBus} eventBus - EventBus instance
+   */
+  setEventBus(eventBus) {
+    this.eventBus = eventBus;
+  }
+
+  /**
    * Start the main game loop
    */
   start() {
@@ -151,10 +162,16 @@ class Engine {
   }
 
   /**
-   * Call all registered update callbacks
+   * Call all registered update callbacks and emit game:tick event
    * @param {number} deltaTime - Time since last frame in seconds
    */
   update(deltaTime) {
+    // Emit game:tick event for all systems to listen to
+    if (this.eventBus) {
+      this.eventBus.emit("game:tick", { deltaTime });
+    }
+
+    // Call registered update callbacks
     for (const callback of this.updateCallbacks) {
       try {
         callback(deltaTime);
