@@ -1,0 +1,423 @@
+import {
+  advanceDays,
+  createInitialSession,
+  getAvailableMissions,
+  getAvailableResearch,
+  getReadyCrew,
+  hydrateSession,
+  launchMission,
+  recruitCrew,
+  startResearch,
+  summarizeSession,
+  trainCrew,
+} from "../domain/stellarCommandSession.js";
+import RealtimeClient from "../net/RealtimeClient.js";
+import { createRoomCode, isValidRoomCode } from "../net/multiplayerProtocol.js";
+
+const STORAGE_KEY = "stellar-command-session-v2";
+const TABS = ["Command", "Missions", "Research", "Crew", "Network"];
+
+function money(value) {
+  return `${Math.round(value).toLocaleString()}M`;
+}
+
+function percent(value) {
+  return `${Math.round(value)}%`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function progress(current, total) {
+  if (!total) return 0;
+  return Math.min(100, Math.round((current / total) * 100));
+}
+
+class StellarCommandApp {
+  constructor(root) {
+    this.root = root;
+    this.activeTab = "Command";
+    this.roomCode = "";
+    this.networkStatus = "Solo mode";
+    this.peers = [];
+    this.session = this.loadSession();
+    this.client = new RealtimeClient();
+    this.tickTimer = null;
+  }
+
+  start() {
+    this.bindNetwork();
+    this.render();
+    this.tickTimer = window.setInterval(() => {
+      if (document.hidden || this.session.player.activeMissions.length === 0) return;
+      this.mutate((session) => advanceDays(session, 1), { sync: true });
+    }, 16000);
+  }
+
+  destroy() {
+    window.clearInterval(this.tickTimer);
+    this.client.disconnect();
+  }
+
+  bindNetwork() {
+    this.client.addEventListener("status", (event) => {
+      this.networkStatus = event.detail.message || event.detail.status;
+      this.render();
+    });
+    this.client.addEventListener("room:joined", (event) => {
+      this.roomCode = event.detail.roomCode || this.roomCode;
+      this.networkStatus = `Room ${this.roomCode}`;
+      this.render();
+      this.client.syncSession(this.session);
+    });
+    this.client.addEventListener("room:peers", (event) => {
+      this.peers = event.detail.payload?.peers || [];
+      this.render();
+    });
+    this.client.addEventListener("session:sync", (event) => {
+      const incoming = event.detail.payload?.session;
+      if (!incoming || event.detail.playerId === this.session.player.id) return;
+      if (incoming.day >= this.session.day) {
+        this.session = hydrateSession(incoming);
+        this.saveSession();
+        this.networkStatus = `Synced from ${event.detail.playerId}`;
+        this.render();
+      }
+    });
+  }
+
+  loadSession() {
+    try {
+      return hydrateSession(JSON.parse(localStorage.getItem(STORAGE_KEY)));
+    } catch {
+      return createInitialSession();
+    }
+  }
+
+  saveSession() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(this.session));
+  }
+
+  mutate(updater, options = {}) {
+    try {
+      this.session = updater(this.session);
+      this.saveSession();
+      this.render();
+      if (options.sync) this.client.syncSession(this.session);
+    } catch (error) {
+      this.networkStatus = error.message;
+      this.render();
+    }
+  }
+
+  render() {
+    this.root.innerHTML = `
+      <main class="sc-shell">
+        ${this.renderHero()}
+        <section class="sc-workspace">
+          ${this.renderTabs()}
+          <div class="sc-panel">
+            ${this.renderActiveTab()}
+          </div>
+        </section>
+      </main>
+    `;
+    this.attachEvents();
+  }
+
+  renderHero() {
+    const summary = summarizeSession(this.session);
+    const leader = summary.rank[0];
+    return `
+      <section class="sc-hero">
+        <div class="sc-orbit" aria-hidden="true"></div>
+        <div class="sc-hero__copy">
+          <p class="sc-kicker">Day ${this.session.day} / ${escapeHtml(this.session.mode.toUpperCase())}</p>
+          <h1>Stellar Command</h1>
+          <p class="sc-tagline">Run the agency, beat the rival clubs, and turn messy space decisions into headline wins.</p>
+        </div>
+        <div class="sc-stats" aria-label="Agency stats">
+          ${this.stat("Credits", money(this.session.player.credits))}
+          ${this.stat("Science", this.session.player.science)}
+          ${this.stat("Rep", percent(this.session.player.reputation))}
+          ${this.stat("Score", this.session.player.score)}
+        </div>
+        <div class="sc-actions">
+          <button class="sc-button sc-button--primary" data-action="advance" data-days="1">Advance Day</button>
+          <button class="sc-button" data-action="advance" data-days="7">Fast Week</button>
+          <button class="sc-button" data-action="save">Save</button>
+          <button class="sc-icon-button" title="New game" data-action="new">New</button>
+        </div>
+        <p class="sc-leader">Leader: ${escapeHtml(leader.agencyName)} with ${leader.score} points</p>
+      </section>
+    `;
+  }
+
+  stat(label, value) {
+    return `
+      <div class="sc-stat">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(value)}</strong>
+      </div>
+    `;
+  }
+
+  renderTabs() {
+    return `
+      <nav class="sc-tabs" aria-label="Game sections">
+        ${TABS.map((tab) => `
+          <button class="sc-tab ${tab === this.activeTab ? "is-active" : ""}" data-tab="${tab}">
+            ${tab}
+          </button>
+        `).join("")}
+      </nav>
+    `;
+  }
+
+  renderActiveTab() {
+    switch (this.activeTab) {
+      case "Missions":
+        return this.renderMissions();
+      case "Research":
+        return this.renderResearch();
+      case "Crew":
+        return this.renderCrew();
+      case "Network":
+        return this.renderNetwork();
+      default:
+        return this.renderCommand();
+    }
+  }
+
+  renderCommand() {
+    return `
+      <div class="sc-command">
+        <section class="sc-board">
+          <h2>Live Ops</h2>
+          ${this.session.player.activeMissions.length
+            ? this.session.player.activeMissions.map((mission) => `
+              <article class="sc-row">
+                <div>
+                  <strong>${escapeHtml(mission.name)}</strong>
+                  <span>${escapeHtml(mission.tier)} / ${mission.duration - mission.elapsedDays} days left</span>
+                </div>
+                <div class="sc-meter"><span style="width:${progress(mission.elapsedDays, mission.duration)}%"></span></div>
+              </article>
+            `).join("")
+            : `<p class="sc-empty">No active missions. Pick something bold from the mission board.</p>`}
+        </section>
+        <section class="sc-board">
+          <h2>League Table</h2>
+          ${summarizeSession(this.session).rank.map((agency, index) => `
+            <article class="sc-rank ${agency.id === this.session.player.id ? "is-player" : ""}">
+              <span>${index + 1}</span>
+              <strong>${escapeHtml(agency.agencyName)}</strong>
+              <em>${agency.score}</em>
+            </article>
+          `).join("")}
+        </section>
+        <section class="sc-board sc-feed">
+          <h2>Signal Feed</h2>
+          ${this.session.timeline.map((event) => `
+            <article>
+              <span>Day ${event.day}</span>
+              <strong>${escapeHtml(event.title)}</strong>
+              <p>${escapeHtml(event.body)}</p>
+            </article>
+          `).join("")}
+        </section>
+      </div>
+    `;
+  }
+
+  renderMissions() {
+    const readyCrew = getReadyCrew(this.session);
+    const available = getAvailableMissions(this.session);
+    return `
+      <div class="sc-grid">
+        ${available.map((mission) => {
+          const enoughCrew = readyCrew.length >= mission.crewRequired;
+          const enoughCredits = this.session.player.credits >= mission.cost;
+          return `
+            <article class="sc-card">
+              <span class="sc-pill">${escapeHtml(mission.tier)}</span>
+              <h2>${escapeHtml(mission.name)}</h2>
+              <p>${escapeHtml(mission.educationalFact)}</p>
+              <dl class="sc-specs">
+                <div><dt>Cost</dt><dd>${money(mission.cost)}</dd></div>
+                <div><dt>Duration</dt><dd>${mission.duration}d</dd></div>
+                <div><dt>Crew</dt><dd>${mission.crewRequired}</dd></div>
+                <div><dt>Odds</dt><dd>${mission.successRate}%</dd></div>
+              </dl>
+              <button class="sc-button sc-button--primary" data-action="launch" data-mission="${mission.id}" ${!enoughCrew || !enoughCredits ? "disabled" : ""}>
+                Launch
+              </button>
+            </article>
+          `;
+        }).join("") || `<p class="sc-empty">Research or complete prerequisites to unlock fresh missions.</p>`}
+      </div>
+    `;
+  }
+
+  renderResearch() {
+    const active = this.session.player.activeResearch;
+    const available = getAvailableResearch(this.session);
+    return `
+      ${active ? `
+        <section class="sc-board">
+          <h2>${escapeHtml(active.name)}</h2>
+          <p>${escapeHtml(active.category)} research in progress.</p>
+          <div class="sc-meter"><span style="width:${progress(active.elapsedDays, active.duration)}%"></span></div>
+        </section>
+      ` : ""}
+      <div class="sc-grid">
+        ${available.map((research) => `
+          <article class="sc-card">
+            <span class="sc-pill">${escapeHtml(research.category)}</span>
+            <h2>${escapeHtml(research.name)}</h2>
+            <p>${escapeHtml(research.description)}</p>
+            <dl class="sc-specs">
+              <div><dt>Credits</dt><dd>${money(research.creditCost)}</dd></div>
+              <div><dt>Science</dt><dd>${research.scienceCost}</dd></div>
+              <div><dt>Time</dt><dd>${research.duration}d</dd></div>
+              <div><dt>Tier</dt><dd>${research.tier}</dd></div>
+            </dl>
+            <button class="sc-button sc-button--primary" data-action="research" data-research="${research.id}" ${active ? "disabled" : ""}>Start</button>
+          </article>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  renderCrew() {
+    return `
+      <div class="sc-toolbar">
+        <button class="sc-button sc-button--primary" data-action="recruit" data-role="pilot">Recruit Pilot</button>
+        <button class="sc-button" data-action="recruit" data-role="engineer">Recruit Engineer</button>
+        <button class="sc-button" data-action="recruit" data-role="scientist">Recruit Scientist</button>
+      </div>
+      <div class="sc-grid sc-grid--crew">
+        ${this.session.player.crew.map((crew) => `
+          <article class="sc-card sc-crew">
+            <div class="sc-avatar">${escapeHtml(crew.avatar)}</div>
+            <h2>${escapeHtml(crew.name)}</h2>
+            <p>${escapeHtml(crew.role.replaceAll("_", " "))} / ${escapeHtml(crew.status)}</p>
+            <dl class="sc-specs">
+              <div><dt>Skill</dt><dd>${crew.skillLevel}</dd></div>
+              <div><dt>Morale</dt><dd>${crew.morale}</dd></div>
+              <div><dt>Health</dt><dd>${crew.health}</dd></div>
+              <div><dt>XP</dt><dd>${crew.experience}</dd></div>
+            </dl>
+            <button class="sc-button" data-action="train" data-crew="${crew.id}" ${crew.status !== "ready" ? "disabled" : ""}>Train</button>
+          </article>
+        `).join("")}
+      </div>
+    `;
+  }
+
+  renderNetwork() {
+    return `
+      <div class="sc-command">
+        <section class="sc-board">
+          <h2>Same WiFi Room</h2>
+          <p class="sc-empty">Run the LAN host on the PC, then open the shown address from phones on the same WiFi.</p>
+          <div class="sc-room">
+            <input id="room-code" maxlength="5" value="${escapeHtml(this.roomCode)}" placeholder="ROOM5" autocomplete="off">
+            <button class="sc-button sc-button--primary" data-action="host-room">Create</button>
+            <button class="sc-button" data-action="join-room">Join</button>
+          </div>
+          <p class="sc-status">${escapeHtml(this.networkStatus)}</p>
+        </section>
+        <section class="sc-board">
+          <h2>Players</h2>
+          ${this.peers.length
+            ? this.peers.map((peer) => `<article class="sc-row"><strong>${escapeHtml(peer.agencyName || peer.playerId)}</strong><span>${escapeHtml(peer.playerId)}</span></article>`).join("")
+            : `<p class="sc-empty">No LAN peers connected yet.</p>`}
+        </section>
+      </div>
+    `;
+  }
+
+  attachEvents() {
+    this.root.querySelectorAll("[data-tab]").forEach((button) => {
+      button.addEventListener("click", () => {
+        this.activeTab = button.dataset.tab;
+        this.render();
+      });
+    });
+
+    this.root.querySelectorAll("[data-action]").forEach((button) => {
+      button.addEventListener("click", () => this.handleAction(button));
+    });
+  }
+
+  handleAction(button) {
+    const action = button.dataset.action;
+    if (action === "advance") {
+      this.mutate((session) => advanceDays(session, Number(button.dataset.days || 1)), { sync: true });
+    }
+    if (action === "save") {
+      this.saveSession();
+      this.networkStatus = "Saved on this device";
+      this.render();
+    }
+    if (action === "new") {
+      this.session = createInitialSession({ agencyName: this.session.player.agencyName });
+      this.saveSession();
+      this.render();
+    }
+    if (action === "launch") {
+      this.mutate((session) => {
+        const mission = getAvailableMissions(session).find((item) => item.id === button.dataset.mission);
+        const crewIds = getReadyCrew(session).slice(0, mission.crewRequired).map((crew) => crew.id);
+        return launchMission(session, mission.id, crewIds);
+      }, { sync: true });
+    }
+    if (action === "research") {
+      this.mutate((session) => startResearch(session, button.dataset.research), { sync: true });
+    }
+    if (action === "recruit") {
+      this.mutate((session) => recruitCrew(session, button.dataset.role), { sync: true });
+    }
+    if (action === "train") {
+      this.mutate((session) => trainCrew(session, button.dataset.crew), { sync: true });
+    }
+    if (action === "host-room") {
+      const roomCode = createRoomCode();
+      this.roomCode = roomCode;
+      this.session.mode = "lan";
+      this.client.connect({
+        roomCode,
+        playerId: this.session.player.id,
+        agencyName: this.session.player.agencyName,
+      });
+      this.render();
+    }
+    if (action === "join-room") {
+      const input = this.root.querySelector("#room-code");
+      const roomCode = input?.value?.trim().toUpperCase();
+      if (!isValidRoomCode(roomCode)) {
+        this.networkStatus = "Enter a 5 character room code";
+        this.render();
+        return;
+      }
+      this.roomCode = roomCode;
+      this.session.mode = "lan";
+      this.client.connect({
+        roomCode,
+        playerId: this.session.player.id,
+        agencyName: this.session.player.agencyName,
+      });
+      this.render();
+    }
+  }
+}
+
+export default StellarCommandApp;
+export { STORAGE_KEY, StellarCommandApp };

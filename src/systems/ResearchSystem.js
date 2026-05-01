@@ -33,6 +33,17 @@ export class ResearchSystem {
    * @param {Object} initialState - Initial state for backward compatibility
    */
   constructor(eventBus, gameState, researchData = {}, initialState = {}) {
+    if (eventBus && typeof eventBus.getState === "function") {
+      const actualGameState = eventBus;
+      const actualEventBus = gameState;
+      eventBus = actualEventBus;
+      gameState = actualGameState;
+    } else if (gameState && typeof gameState.getState !== "function") {
+      initialState = researchData || {};
+      researchData = gameState;
+      gameState = null;
+    }
+
     this.eventBus = eventBus;
     this.gameState = gameState;
     this.researchData = researchData;
@@ -47,8 +58,8 @@ export class ResearchSystem {
       this.onResearchStartBound = this.onResearchStart.bind(this);
       this.onGameTickBound = this.onGameTick.bind(this);
 
-      this.eventBus.subscribe("research:start", this.onResearchStartBound);
-      this.eventBus.subscribe("game:tick", this.onGameTickBound);
+      this.eventBus?.subscribe?.("research:start", this.onResearchStartBound);
+      this.eventBus?.subscribe?.("game:tick", this.onGameTickBound);
     } else {
       // Legacy state management
       this.state = {
@@ -352,8 +363,8 @@ export class ResearchSystem {
    */
   destroy() {
     if (this.gameState) {
-      this.eventBus.unsubscribe("research:start", this.onResearchStartBound);
-      this.eventBus.unsubscribe("game:tick", this.onGameTickBound);
+      this.eventBus?.unsubscribe?.("research:start", this.onResearchStartBound);
+      this.eventBus?.unsubscribe?.("game:tick", this.onGameTickBound);
     }
   }
 }

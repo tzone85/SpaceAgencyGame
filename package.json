@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "host": "npm run build && node scripts/lan-server.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "test": "jest"
@@ -19,6 +20,9 @@
   ],
   "author": "VXD Team",
   "license": "MIT",
+  "dependencies": {
+    "ws": "^8.18.3"
+  },
   "devDependencies": {
     "@babel/core": "^7.29.0",
     "@babel/preset-env": "^7.29.2",

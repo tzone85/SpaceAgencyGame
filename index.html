@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Stellar Command - A space agency management game where players control a space agency, manage missions, and explore the cosmos">
+  <meta name="description" content="Stellar Command - a responsive space agency strategy game with solo, rival AI, and same-WiFi LAN play.">
   <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Stellar Command">
   <title>Stellar Command - Space Agency Management Game</title>
 
   <!-- Favicon -->
@@ -16,13 +18,10 @@
   <link rel="preload" href="/fonts/orbitron-bold.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/orbitron-regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/roboto-mono-regular.woff2" as="font" type="font/woff2" crossorigin>
-
-  <!-- Google Font: Press Start 2P for pixel game aesthetic -->
+  <link rel="preconnect" href="/" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 
-  <!-- Core theme and glassmorphism styles -->
   <link rel="stylesheet" href="./styles/main.css">
   <link rel="stylesheet" href="./styles/crew.css">
   <link rel="stylesheet" href="./styles/tutorial.css">
@@ -58,10 +57,12 @@
     html, body {
       width: 100%;
       height: 100%;
-      overflow: hidden;
+      min-height: 100%;
+      overflow-x: hidden;
       background-color: #000000;
-      font-family: 'Orbitron', 'Roboto Mono', monospace;
-      color: #00ff00;
+      background: #101828;
+      font-family: 'Orbitron', 'Roboto Mono', system-ui, sans-serif;
+      color: #f8fafc;
     }
 
     canvas {
@@ -75,9 +76,9 @@
 
     #game-container {
       width: 100%;
-      height: 100%;
+      min-height: 100%;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
   </style>
 </head>
