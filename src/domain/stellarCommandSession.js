@@ -15,11 +15,21 @@ const STARTER_CREW_IDS = [
   "valentina_tereshkova",
 ];
 
-const AI_AGENCIES = [
-  "Nova Youth Space Club",
+const AFRICAN_CREW_IDS = [
+  "sara_sabry",
+  "cheick_modibo_diarra",
+  "mark_shuttleworth",
+];
+
+const AFRICAN_AI_AGENCIES = [
   "Lagos Orbital Academy",
   "Cape Town Star Lab",
   "Nairobi Orbit Club",
+];
+
+const AI_AGENCIES = [
+  "Nova Youth Space Club",
+  ...AFRICAN_AI_AGENCIES,
   "Orbit Arcade Labs",
   "Moonshot High",
 ];
@@ -135,17 +145,41 @@ function createPlayer({ agencyName = "Stellar Command", playerId = null } = {}) 
   };
 }
 
-function createRivals() {
-  return AI_AGENCIES.map((agencyName, index) => ({
+function createRival(agencyName, index) {
+  return {
     id: `rival-${index + 1}`,
     agencyName,
-    score: 35 - index * 6,
+    score: Math.max(8, 35 - index * 6),
     techLevel: 1,
-    reputation: 42 - index * 3,
+    reputation: Math.max(18, 42 - index * 3),
     completedMissions: [],
     activeMission: null,
     nextLaunchDay: 7 + index * 4,
-  }));
+  };
+}
+
+function createRivals() {
+  return AI_AGENCIES.map(createRival);
+}
+
+function ensureAfricanRepresentation(session) {
+  if (!session?.player?.crew || !Array.isArray(session.rivals)) return session;
+
+  const crewIds = new Set(session.player.crew.map((crew) => crew.id));
+  for (const crewId of AFRICAN_CREW_IDS) {
+    if (crewIds.has(crewId)) continue;
+    const source = FAMOUS_ASTRONAUTS.find((crew) => crew.id === crewId);
+    if (source) session.player.crew.push(normalizeCrew(source, session.player.crew.length));
+  }
+
+  const rivalNames = new Set(session.rivals.map((rival) => rival.agencyName));
+  for (const agencyName of AFRICAN_AI_AGENCIES) {
+    if (!rivalNames.has(agencyName)) {
+      session.rivals.push(createRival(agencyName, session.rivals.length));
+    }
+  }
+
+  return session;
 }
 
 export function createInitialSession(options = {}) {
@@ -182,7 +216,7 @@ export function hydrateSession(saved) {
   if (!saved || saved.meta?.saveVersion !== SAVE_VERSION) {
     return createInitialSession();
   }
-  return saved;
+  return ensureAfricanRepresentation(saved);
 }
 
 export function getAvailableMissions(session) {

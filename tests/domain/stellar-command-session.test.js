@@ -4,6 +4,7 @@ import {
   getAvailableMissions,
   getAvailableResearch,
   getTutorialProgress,
+  hydrateSession,
   launchMission,
   recruitCrew,
   startResearch,
@@ -33,6 +34,33 @@ describe("stellar command session domain", () => {
       "Mark Shuttleworth",
     ]));
     expect(rivalNames).toEqual(expect.arrayContaining([
+      "Lagos Orbital Academy",
+      "Cape Town Star Lab",
+      "Nairobi Orbit Club",
+    ]));
+  });
+
+  test("hydrates older saves with African crew and rivals", () => {
+    const legacySave = createInitialSession();
+    legacySave.player.crew = legacySave.player.crew.filter((crew) => ![
+      "sara_sabry",
+      "cheick_modibo_diarra",
+      "mark_shuttleworth",
+    ].includes(crew.id));
+    legacySave.rivals = legacySave.rivals.filter((rival) => ![
+      "Lagos Orbital Academy",
+      "Cape Town Star Lab",
+      "Nairobi Orbit Club",
+    ].includes(rival.agencyName));
+
+    const hydrated = hydrateSession(legacySave);
+
+    expect(hydrated.player.crew.map((crew) => crew.name)).toEqual(expect.arrayContaining([
+      "Sara Sabry",
+      "Cheick Diarra",
+      "Mark Shuttleworth",
+    ]));
+    expect(hydrated.rivals.map((rival) => rival.agencyName)).toEqual(expect.arrayContaining([
       "Lagos Orbital Academy",
       "Cape Town Star Lab",
       "Nairobi Orbit Club",
