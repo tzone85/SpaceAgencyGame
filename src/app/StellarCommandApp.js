@@ -12,11 +12,20 @@ import {
   summarizeSession,
   trainCrew,
 } from "../domain/stellarCommandSession.js";
+import {
+  applyImpulse,
+  createOrbitState,
+  getOrbitTelemetry,
+  projectOrbitPath,
+  stepOrbit,
+} from "../domain/orbitalPhysics.js";
 import RealtimeClient from "../net/RealtimeClient.js";
 import { createRoomCode, isValidRoomCode } from "../net/multiplayerProtocol.js";
 
 const STORAGE_KEY = "stellar-command-session-v2";
-const TABS = ["Command", "Academy", "Missions", "Research", "Crew", "Network"];
+const TABS = ["Command", "Academy", "Flight Lab", "Missions", "Research", "Crew", "Network"];
+const ORBIT_CENTER = 150;
+const ORBIT_SCALE = 0.78;
 
 function money(value) {
   return `${Math.round(value).toLocaleString()}M`;
@@ -50,6 +59,8 @@ class StellarCommandApp {
     this.session = this.loadSession();
     this.client = new RealtimeClient();
     this.tickTimer = null;
+    this.visualTimer = null;
+    this.orbitState = createOrbitState();
   }
 
   start() {
@@ -59,10 +70,16 @@ class StellarCommandApp {
       if (document.hidden || this.session.player.activeMissions.length === 0) return;
       this.mutate((session) => advanceDays(session, 1), { sync: true });
     }, 16000);
+    this.visualTimer = window.setInterval(() => {
+      if (document.hidden || this.activeTab !== "Flight Lab") return;
+      this.orbitState = stepOrbit(this.orbitState, 0.16);
+      this.render();
+    }, 110);
   }
 
   destroy() {
     window.clearInterval(this.tickTimer);
+    window.clearInterval(this.visualTimer);
     this.client.disconnect();
   }
 
@@ -137,7 +154,7 @@ class StellarCommandApp {
     const leader = summary.rank[0];
     return `
       <section class="sc-hero">
-        <div class="sc-orbit" aria-hidden="true"></div>
+        ${this.renderHeroVisual()}
         <div class="sc-hero__copy">
           <p class="sc-kicker">Day ${this.session.day} / ${escapeHtml(this.session.mode.toUpperCase())}</p>
           <h1>Stellar Command</h1>
@@ -157,6 +174,42 @@ class StellarCommandApp {
         </div>
         <p class="sc-leader">Leader: ${escapeHtml(leader.agencyName)} with ${leader.score} points</p>
       </section>
+    `;
+  }
+
+  renderHeroVisual() {
+    return `
+      <div class="sc-hero-visual" aria-hidden="true">
+        <svg viewBox="0 0 420 300" role="img">
+          <defs>
+            <linearGradient id="planetGlow" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0" stop-color="#46e6b0"/>
+              <stop offset="0.55" stop-color="#58d7ff"/>
+              <stop offset="1" stop-color="#ffd166"/>
+            </linearGradient>
+          </defs>
+          <g class="sc-hero-rings">
+            <ellipse cx="210" cy="154" rx="156" ry="54"></ellipse>
+            <ellipse cx="210" cy="154" rx="116" ry="40"></ellipse>
+          </g>
+          <circle class="sc-hero-planet" cx="210" cy="154" r="54"></circle>
+          <path class="sc-hero-land" d="M170 141c24-24 58-19 77-2 18 16 34 7 48 1-5 31-35 61-76 61-33 0-59-16-71-39 7 3 14 1 22-21z"></path>
+          <g class="sc-hero-rocket">
+            <path d="M318 70l34 62-42-14-42 14 34-62c3-6 13-6 16 0z"></path>
+            <path d="M304 121h28l-14 38z"></path>
+            <circle cx="318" cy="102" r="8"></circle>
+          </g>
+          <g class="sc-hero-vector">
+            <path d="M98 228h122"></path>
+            <path d="M220 228l-16-10v20z"></path>
+          </g>
+          <g class="sc-spark-lines">
+            <path d="M68 84h52"></path>
+            <path d="M332 218h42"></path>
+            <path d="M76 198h32"></path>
+          </g>
+        </svg>
+      </div>
     `;
   }
 
@@ -187,6 +240,8 @@ class StellarCommandApp {
         return this.renderMissions();
       case "Academy":
         return this.renderAcademy();
+      case "Flight Lab":
+        return this.renderFlightLab();
       case "Research":
         return this.renderResearch();
       case "Crew":
@@ -236,6 +291,102 @@ class StellarCommandApp {
               <p>${escapeHtml(event.body)}</p>
             </article>
           `).join("")}
+        </section>
+      </div>
+    `;
+  }
+
+  orbitPoint(point) {
+    return {
+      x: ORBIT_CENTER + point.x * ORBIT_SCALE,
+      y: ORBIT_CENTER + point.y * ORBIT_SCALE,
+    };
+  }
+
+  renderVector(origin, vector, className, scale = 8) {
+    const start = this.orbitPoint(origin);
+    const end = {
+      x: start.x + vector.x * scale,
+      y: start.y + vector.y * scale,
+    };
+    const angle = Math.atan2(end.y - start.y, end.x - start.x);
+    const left = {
+      x: end.x - Math.cos(angle - 0.55) * 10,
+      y: end.y - Math.sin(angle - 0.55) * 10,
+    };
+    const right = {
+      x: end.x - Math.cos(angle + 0.55) * 10,
+      y: end.y - Math.sin(angle + 0.55) * 10,
+    };
+
+    return `
+      <g class="${className}">
+        <path d="M ${start.x} ${start.y} L ${end.x} ${end.y}"></path>
+        <path d="M ${left.x} ${left.y} L ${end.x} ${end.y} L ${right.x} ${right.y}"></path>
+      </g>
+    `;
+  }
+
+  renderFlightLab() {
+    const telemetry = getOrbitTelemetry(this.orbitState);
+    const ship = this.orbitPoint(this.orbitState.position);
+    const path = projectOrbitPath(this.orbitState, 220, 0.12)
+      .map((point) => this.orbitPoint(point))
+      .map((point, index) => `${index === 0 ? "M" : "L"} ${point.x} ${point.y}`)
+      .join(" ");
+    const gravity = {
+      x: -this.orbitState.position.x / Math.max(1, telemetry.radius) * telemetry.gravity,
+      y: -this.orbitState.position.y / Math.max(1, telemetry.radius) * telemetry.gravity,
+    };
+
+    return `
+      <div class="sc-flight">
+        <section class="sc-flight-stage">
+          <svg class="sc-orbit-sim" viewBox="0 0 300 300" role="img" aria-label="Interactive orbital physics simulator">
+            <defs>
+              <radialGradient id="earthTeen" cx="35%" cy="28%" r="72%">
+                <stop offset="0" stop-color="#7df8c7"/>
+                <stop offset="0.52" stop-color="#2aa7ff"/>
+                <stop offset="1" stop-color="#1b3d8f"/>
+              </radialGradient>
+            </defs>
+            <circle class="sc-sim-grid" cx="150" cy="150" r="126"></circle>
+            <circle class="sc-sim-grid sc-sim-grid--inner" cx="150" cy="150" r="82"></circle>
+            <path class="sc-orbit-path" d="${path}"></path>
+            <circle class="sc-planet" cx="150" cy="150" r="${this.orbitState.bodyRadius * ORBIT_SCALE}"></circle>
+            <path class="sc-continent" d="M126 137c14-13 36-13 48-2 13 12 23 6 35 2-3 23-27 44-58 44-22 0-41-9-51-27 10 4 17-1 26-17z"></path>
+            ${this.renderVector(this.orbitState.position, this.orbitState.velocity, "sc-vector sc-vector--velocity", 9)}
+            ${this.renderVector(this.orbitState.position, gravity, "sc-vector sc-vector--gravity", 360)}
+            <g class="sc-ship" transform="translate(${ship.x} ${ship.y})">
+              <path d="M 0 -14 L 10 10 L 0 6 L -10 10 Z"></path>
+              <circle cx="0" cy="-2" r="4"></circle>
+            </g>
+          </svg>
+          <div class="sc-flight-controls" aria-label="Orbital burns">
+            <button class="sc-button sc-button--primary" data-action="orbit-impulse" data-burn="prograde">Prograde</button>
+            <button class="sc-button" data-action="orbit-impulse" data-burn="retrograde">Retrograde</button>
+            <button class="sc-button" data-action="orbit-impulse" data-burn="radialOut">Radial Out</button>
+            <button class="sc-button" data-action="orbit-impulse" data-burn="radialIn">Radial In</button>
+            <button class="sc-button" data-action="orbit-reset">Reset</button>
+          </div>
+        </section>
+        <section class="sc-flight-readout">
+          <span class="sc-pill">Vector Physics</span>
+          <h2>Orbital Flight Lab</h2>
+          <p>Use short burns to see how velocity and gravity vectors reshape an orbit. Prograde adds speed, retrograde lowers it, and radial burns tilt the path.</p>
+          <dl class="sc-specs sc-specs--flight">
+            <div><dt>Status</dt><dd>${escapeHtml(telemetry.status)}</dd></div>
+            <div><dt>Altitude</dt><dd>${telemetry.altitude}</dd></div>
+            <div><dt>Speed</dt><dd>${telemetry.speed}</dd></div>
+            <div><dt>Eccentricity</dt><dd>${telemetry.eccentricity}</dd></div>
+            <div><dt>Gravity</dt><dd>${telemetry.gravity}</dd></div>
+            <div><dt>Period</dt><dd>${Number.isFinite(telemetry.period) ? telemetry.period : "Escape"}</dd></div>
+          </dl>
+          <div class="sc-legend">
+            <span><i class="sc-dot sc-dot--velocity"></i>Velocity vector</span>
+            <span><i class="sc-dot sc-dot--gravity"></i>Gravity vector</span>
+            <span><i class="sc-dot sc-dot--path"></i>Predicted path</span>
+          </div>
         </section>
       </div>
     `;
@@ -419,7 +570,16 @@ class StellarCommandApp {
     }
     if (action === "new") {
       this.session = createInitialSession({ agencyName: this.session.player.agencyName });
+      this.orbitState = createOrbitState();
       this.saveSession();
+      this.render();
+    }
+    if (action === "orbit-impulse") {
+      this.orbitState = applyImpulse(this.orbitState, button.dataset.burn, 0.62);
+      this.render();
+    }
+    if (action === "orbit-reset") {
+      this.orbitState = createOrbitState();
       this.render();
     }
     if (action === "launch") {

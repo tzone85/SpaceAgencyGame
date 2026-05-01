@@ -1295,6 +1295,85 @@ input {
     url("data:image/svg+xml,%3Csvg width='1200' height='620' viewBox='0 0 1200 620' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='1200' height='620' fill='%23101828'/%3E%3Cg fill='%23ffffff' opacity='.8'%3E%3Ccircle cx='80' cy='80' r='2'/%3E%3Ccircle cx='180' cy='150' r='1.4'/%3E%3Ccircle cx='360' cy='90' r='1.8'/%3E%3Ccircle cx='540' cy='210' r='1.2'/%3E%3Ccircle cx='720' cy='110' r='2'/%3E%3Ccircle cx='980' cy='160' r='1.5'/%3E%3Ccircle cx='1120' cy='70' r='2.4'/%3E%3Ccircle cx='1040' cy='360' r='1.2'/%3E%3Ccircle cx='220' cy='420' r='1.7'/%3E%3C/g%3E%3Cpath d='M150 480 C360 310 720 280 1060 120' stroke='%2358d7ff' stroke-width='3' stroke-dasharray='12 18' fill='none' opacity='.42'/%3E%3Cpath d='M860 455 l52 -120 54 120 -54 -26z' fill='%23ff6b6b'/%3E%3Cpath d='M912 335 l18 52 h-36z' fill='%23ffd166'/%3E%3Ccircle cx='280' cy='300' r='88' fill='%2346e6b0' opacity='.16'/%3E%3Ccircle cx='280' cy='300' r='118' fill='none' stroke='%2346e6b0' stroke-width='2' opacity='.34'/%3E%3C/svg%3E") center / cover;
 }
 
+.sc-hero__copy,
+.sc-stats,
+.sc-actions,
+.sc-leader {
+  position: relative;
+  z-index: 1;
+  grid-column: 1;
+}
+
+.sc-hero-visual {
+  position: relative;
+  z-index: 1;
+  grid-column: 2;
+  grid-row: 1 / span 4;
+  align-self: center;
+  min-height: 260px;
+}
+
+.sc-hero-visual svg {
+  display: block;
+  width: 100%;
+  filter: drop-shadow(0 22px 42px rgba(0, 0, 0, 0.42));
+}
+
+.sc-hero-rings ellipse,
+.sc-spark-lines path {
+  fill: none;
+  stroke: rgba(248, 250, 252, 0.34);
+  stroke-width: 2;
+}
+
+.sc-hero-rings {
+  transform-origin: 210px 154px;
+  animation: scHeroTilt 9s ease-in-out infinite;
+}
+
+.sc-hero-planet {
+  fill: url("#planetGlow");
+  stroke: rgba(255, 255, 255, 0.42);
+  stroke-width: 2;
+}
+
+.sc-hero-land {
+  fill: rgba(16, 24, 40, 0.38);
+}
+
+.sc-hero-rocket {
+  transform-origin: 318px 116px;
+  animation: scRocketFloat 3.2s ease-in-out infinite;
+}
+
+.sc-hero-rocket path:first-child {
+  fill: var(--sc-coral);
+  stroke: rgba(255, 255, 255, 0.55);
+  stroke-width: 2;
+}
+
+.sc-hero-rocket path:nth-child(2) {
+  fill: var(--sc-yellow);
+}
+
+.sc-hero-rocket circle {
+  fill: #101828;
+  stroke: var(--sc-cyan);
+  stroke-width: 3;
+}
+
+.sc-hero-vector path {
+  fill: var(--sc-yellow);
+  stroke: var(--sc-yellow);
+  stroke-linecap: round;
+  stroke-width: 5;
+}
+
+.sc-spark-lines {
+  animation: scSparkDash 2.8s linear infinite;
+  stroke-dasharray: 10 14;
+}
+
 .sc-hero h1,
 .sc-panel h2,
 .sc-card h2,
@@ -1336,6 +1415,7 @@ input {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
+  max-width: 560px;
 }
 
 .sc-stat,
@@ -1429,7 +1509,7 @@ input {
 
 .sc-tabs {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(7, 1fr);
   gap: 8px;
   padding: 10px;
 }
@@ -1489,6 +1569,165 @@ input {
 .sc-academy__hero p {
   max-width: 78ch;
   margin: 0;
+}
+
+.sc-flight {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(260px, 0.72fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+.sc-flight-stage,
+.sc-flight-readout {
+  border: 1px solid var(--sc-line);
+  border-radius: var(--sc-radius);
+  background: var(--sc-panel-strong);
+}
+
+.sc-flight-stage {
+  display: grid;
+  gap: 12px;
+  padding: clamp(12px, 2vw, 18px);
+  overflow: hidden;
+}
+
+.sc-orbit-sim {
+  width: 100%;
+  min-height: 320px;
+  max-height: 62vh;
+  aspect-ratio: 1;
+  border: 1px solid rgba(88, 215, 255, 0.18);
+  border-radius: var(--sc-radius);
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgba(88, 215, 255, 0.08), transparent 64%),
+    #0d1424;
+  background-size: 24px 24px, 24px 24px, auto, auto;
+}
+
+.sc-sim-grid {
+  fill: none;
+  stroke: rgba(248, 250, 252, 0.18);
+  stroke-dasharray: 5 8;
+  stroke-width: 1.4;
+}
+
+.sc-sim-grid--inner {
+  stroke: rgba(255, 209, 102, 0.2);
+}
+
+.sc-orbit-path {
+  fill: none;
+  stroke: var(--sc-cyan);
+  stroke-dasharray: 4 5;
+  stroke-linecap: round;
+  stroke-width: 2.5;
+  animation: scOrbitDash 8s linear infinite;
+}
+
+.sc-planet {
+  fill: url("#earthTeen");
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 1.8;
+}
+
+.sc-continent {
+  fill: rgba(255, 209, 102, 0.42);
+}
+
+.sc-vector path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3.5;
+}
+
+.sc-vector--velocity path {
+  stroke: var(--sc-yellow);
+}
+
+.sc-vector--gravity path {
+  stroke: var(--sc-coral);
+}
+
+.sc-ship {
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 10px rgba(255, 209, 102, 0.46));
+}
+
+.sc-ship path {
+  fill: var(--sc-yellow);
+  stroke: rgba(255, 255, 255, 0.78);
+  stroke-width: 1.5;
+}
+
+.sc-ship circle {
+  fill: #101828;
+  stroke: var(--sc-cyan);
+  stroke-width: 1.4;
+}
+
+.sc-flight-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(118px, 1fr));
+  gap: 8px;
+}
+
+.sc-flight-controls .sc-button {
+  min-width: 0;
+  padding: 0 10px;
+}
+
+.sc-flight-readout {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: clamp(14px, 2vw, 20px);
+}
+
+.sc-flight-readout h2,
+.sc-flight-readout p {
+  margin: 0;
+}
+
+.sc-specs--flight {
+  margin-top: 0;
+}
+
+.sc-legend {
+  display: grid;
+  gap: 8px;
+  margin-top: auto;
+  color: var(--sc-muted);
+  font-size: 0.9rem;
+}
+
+.sc-legend span {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.sc-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.sc-dot--velocity {
+  background: var(--sc-yellow);
+}
+
+.sc-dot--gravity {
+  background: var(--sc-coral);
+}
+
+.sc-dot--path {
+  background: var(--sc-cyan);
 }
 
 .sc-lessons {
@@ -1691,6 +1930,19 @@ input {
     border-radius: 0;
   }
 
+  .sc-hero__copy,
+  .sc-hero-visual,
+  .sc-stats,
+  .sc-actions,
+  .sc-leader {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .sc-hero-visual {
+    min-height: 190px;
+  }
+
   .sc-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1717,6 +1969,10 @@ input {
     grid-template-columns: 1fr;
   }
 
+  .sc-flight {
+    grid-template-columns: 1fr;
+  }
+
   .sc-coach {
     align-items: stretch;
     flex-direction: column;
@@ -1740,5 +1996,41 @@ input {
   .sc-button,
   .sc-icon-button {
     flex: 1 1 auto;
+  }
+
+  .sc-orbit-sim {
+    min-height: 280px;
+  }
+}
+
+@keyframes scHeroTilt {
+  0%,
+  100% {
+    transform: rotate(-4deg) scale(1);
+  }
+  50% {
+    transform: rotate(5deg) scale(1.04);
+  }
+}
+
+@keyframes scRocketFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(8deg);
+  }
+  50% {
+    transform: translateY(-14px) rotate(13deg);
+  }
+}
+
+@keyframes scSparkDash {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+@keyframes scOrbitDash {
+  to {
+    stroke-dashoffset: -120;
   }
 }
