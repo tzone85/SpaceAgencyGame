@@ -22,6 +22,23 @@ describe("stellar command session domain", () => {
     expect(session.rivals[0].agencyName).toBe("Nova Youth Space Club");
   });
 
+  test("starts with African crew representation and rival agencies", () => {
+    const session = createInitialSession();
+    const crewNames = session.player.crew.map((crew) => crew.name);
+    const rivalNames = session.rivals.map((rival) => rival.agencyName);
+
+    expect(crewNames).toEqual(expect.arrayContaining([
+      "Sara Sabry",
+      "Cheick Diarra",
+      "Mark Shuttleworth",
+    ]));
+    expect(rivalNames).toEqual(expect.arrayContaining([
+      "Lagos Orbital Academy",
+      "Cape Town Star Lab",
+      "Nairobi Orbit Club",
+    ]));
+  });
+
   test("launching a mission spends credits and assigns crew", () => {
     const session = createInitialSession();
     const mission = getAvailableMissions(session).find((item) => item.crewRequired === 2);

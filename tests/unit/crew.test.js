@@ -135,6 +135,14 @@ describe('Crew Data & Templates', () => {
       });
     });
 
+    test('should include African space pioneers and scientists', () => {
+      const africanCrewIds = FAMOUS_ASTRONAUTS.map(astronaut => astronaut.id);
+
+      expect(africanCrewIds).toContain('mark_shuttleworth');
+      expect(africanCrewIds).toContain('sara_sabry');
+      expect(africanCrewIds).toContain('cheick_modibo_diarra');
+    });
+
     test('famous astronauts should have higher stats than typical ranges', () => {
       FAMOUS_ASTRONAUTS.forEach(astronaut => {
         const role = Object.values(CREW_ROLES).find(r => r.id === astronaut.role);
@@ -171,6 +179,23 @@ describe('Crew Data & Templates', () => {
         expect(typeof name).toBe('string');
         expect(name.length).toBeGreaterThan(0);
       });
+    });
+
+    test('should include African first and last names for procedural recruits', () => {
+      expect(NAME_POOLS.firstNames).toEqual(expect.arrayContaining([
+        'Amina',
+        'Ayanda',
+        'Kwame',
+        'Thandi',
+        'Zola',
+      ]));
+      expect(NAME_POOLS.lastNames).toEqual(expect.arrayContaining([
+        'Adebayo',
+        'Dlamini',
+        'Mensah',
+        'Ndlovu',
+        'Okafor',
+      ]));
     });
   });
 

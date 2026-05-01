@@ -9,14 +9,17 @@ const MAX_LOG_ITEMS = 18;
 const STARTER_CREW_IDS = [
   "margaret_hamilton",
   "katherine_johnson",
-  "yuri_gagarin",
+  "sara_sabry",
+  "cheick_modibo_diarra",
+  "mark_shuttleworth",
   "valentina_tereshkova",
-  "alan_turing",
-  "buzz_aldrin",
 ];
 
 const AI_AGENCIES = [
   "Nova Youth Space Club",
+  "Lagos Orbital Academy",
+  "Cape Town Star Lab",
+  "Nairobi Orbit Club",
   "Orbit Arcade Labs",
   "Moonshot High",
 ];
