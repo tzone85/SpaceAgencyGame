@@ -14,7 +14,7 @@ const game = new StellarCommandApp(root);
 game.start();
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
-  navigator.serviceWorker.register("/sw.js").catch(() => {
+  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).catch(() => {
     // Offline support is a nice-to-have; the game should still run without it.
   });
 }
