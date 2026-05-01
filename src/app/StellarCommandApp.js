@@ -19,6 +19,7 @@ import {
   projectOrbitPath,
   stepOrbit,
 } from "../domain/orbitalPhysics.js";
+import { createCrewAvatarSvg } from "./crewAvatar.js";
 import RealtimeClient from "../net/RealtimeClient.js";
 import { createRoomCode, isValidRoomCode } from "../net/multiplayerProtocol.js";
 
@@ -502,9 +503,14 @@ class StellarCommandApp {
       <div class="sc-grid sc-grid--crew">
         ${this.session.player.crew.map((crew) => `
           <article class="sc-card sc-crew">
-            <div class="sc-avatar">${escapeHtml(crew.avatar)}</div>
-            <h2>${escapeHtml(crew.name)}</h2>
-            <p>${escapeHtml(crew.role.replaceAll("_", " "))} / ${escapeHtml(crew.status)}</p>
+            <div class="sc-crew__head">
+              <div class="sc-avatar">${createCrewAvatarSvg(crew)}</div>
+              <div>
+                <h2>${escapeHtml(crew.name)}</h2>
+                <p>${escapeHtml(crew.role.replaceAll("_", " "))} / ${escapeHtml(crew.status)}</p>
+              </div>
+            </div>
+            <p class="sc-crew-note">${escapeHtml(crew.note || "Ready for the next assignment.")}</p>
             <dl class="sc-specs">
               <div><dt>Skill</dt><dd>${crew.skillLevel}</dd></div>
               <div><dt>Morale</dt><dd>${crew.morale}</dd></div>

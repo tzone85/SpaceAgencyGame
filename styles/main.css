@@ -1899,13 +1899,47 @@ input {
 
 .sc-avatar {
   display: grid;
-  width: 52px;
-  height: 52px;
+  width: 82px;
+  height: 82px;
+  flex: 0 0 82px;
   place-items: center;
-  border-radius: 50%;
-  color: #101828;
-  background: linear-gradient(135deg, var(--sc-yellow), var(--sc-coral));
-  font-weight: 900;
+  overflow: hidden;
+  border: 1px solid rgba(248, 250, 252, 0.2);
+  border-radius: var(--sc-radius);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.08);
+}
+
+.sc-avatar-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.sc-avatar-svg text {
+  fill: rgba(248, 250, 252, 0.86);
+  font-family: Orbitron, ui-sans-serif, system-ui, sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.sc-crew__head {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.sc-crew__head h2,
+.sc-crew__head p,
+.sc-crew-note {
+  margin: 0;
+}
+
+.sc-crew-note {
+  color: var(--sc-muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
 }
 
 .sc-room input {
