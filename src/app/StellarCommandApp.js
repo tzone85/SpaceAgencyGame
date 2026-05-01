@@ -4,6 +4,7 @@ import {
   getAvailableMissions,
   getAvailableResearch,
   getReadyCrew,
+  getTutorialProgress,
   hydrateSession,
   launchMission,
   recruitCrew,
@@ -15,7 +16,7 @@ import RealtimeClient from "../net/RealtimeClient.js";
 import { createRoomCode, isValidRoomCode } from "../net/multiplayerProtocol.js";
 
 const STORAGE_KEY = "stellar-command-session-v2";
-const TABS = ["Command", "Missions", "Research", "Crew", "Network"];
+const TABS = ["Command", "Academy", "Missions", "Research", "Crew", "Network"];
 
 function money(value) {
   return `${Math.round(value).toLocaleString()}M`;
@@ -184,6 +185,8 @@ class StellarCommandApp {
     switch (this.activeTab) {
       case "Missions":
         return this.renderMissions();
+      case "Academy":
+        return this.renderAcademy();
       case "Research":
         return this.renderResearch();
       case "Crew":
@@ -196,8 +199,10 @@ class StellarCommandApp {
   }
 
   renderCommand() {
+    const tutorial = getTutorialProgress(this.session);
     return `
       <div class="sc-command">
+        ${tutorial.nextStep ? this.renderCoach(tutorial) : ""}
         <section class="sc-board">
           <h2>Live Ops</h2>
           ${this.session.player.activeMissions.length
@@ -232,6 +237,47 @@ class StellarCommandApp {
             </article>
           `).join("")}
         </section>
+      </div>
+    `;
+  }
+
+  renderCoach(tutorial) {
+    return `
+      <section class="sc-board sc-coach">
+        <div>
+          <span class="sc-pill">Academy ${tutorial.percent}%</span>
+          <h2>Next: ${escapeHtml(tutorial.nextStep.title)}</h2>
+          <p>${escapeHtml(tutorial.nextStep.body)}</p>
+        </div>
+        <button class="sc-button sc-button--primary" data-action="goto-tab" data-target-tab="${escapeHtml(tutorial.nextStep.tab)}">
+          Go to ${escapeHtml(tutorial.nextStep.tab)}
+        </button>
+      </section>
+    `;
+  }
+
+  renderAcademy() {
+    const tutorial = getTutorialProgress(this.session);
+    return `
+      <div class="sc-academy">
+        <section class="sc-board sc-academy__hero">
+          <span class="sc-pill">Flight Academy</span>
+          <h2>${tutorial.completed}/${tutorial.total} Mastery Checks</h2>
+          <p>Follow these steps in order and you will understand the full loop: earn, research, improve crew, beat the table, and bring friends in over the same WiFi.</p>
+          <div class="sc-meter"><span style="width:${tutorial.percent}%"></span></div>
+        </section>
+        <div class="sc-lessons">
+          ${tutorial.steps.map((step, index) => `
+            <article class="sc-lesson ${step.complete ? "is-complete" : ""}">
+              <span>${step.complete ? "Done" : `Step ${index + 1}`}</span>
+              <h2>${escapeHtml(step.title)}</h2>
+              <p>${escapeHtml(step.body)}</p>
+              <button class="sc-button" data-action="goto-tab" data-target-tab="${escapeHtml(step.tab)}">
+                Open ${escapeHtml(step.tab)}
+              </button>
+            </article>
+          `).join("")}
+        </div>
       </div>
     `;
   }
@@ -361,6 +407,10 @@ class StellarCommandApp {
     const action = button.dataset.action;
     if (action === "advance") {
       this.mutate((session) => advanceDays(session, Number(button.dataset.days || 1)), { sync: true });
+    }
+    if (action === "goto-tab") {
+      this.activeTab = button.dataset.targetTab || "Command";
+      this.render();
     }
     if (action === "save") {
       this.saveSession();

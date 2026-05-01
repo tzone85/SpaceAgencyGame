@@ -3,6 +3,7 @@ import {
   createInitialSession,
   getAvailableMissions,
   getAvailableResearch,
+  getTutorialProgress,
   launchMission,
   recruitCrew,
   startResearch,
@@ -76,5 +77,19 @@ describe("stellar command session domain", () => {
 
     expect(advanced.rivals[0].score).toBeGreaterThan(session.rivals[0].score);
     expect(advanced.timeline.some((event) => event.actor === "rival")).toBe(true);
+  });
+
+  test("tutorial progress tracks real mastery milestones", () => {
+    const session = createInitialSession();
+    const opening = getTutorialProgress(session);
+    expect(opening.nextStep.id).toBe("launch-mission");
+
+    const mission = getAvailableMissions(session).find((item) => item.duration <= 5);
+    const crewIds = session.player.crew.slice(0, mission.crewRequired).map((crew) => crew.id);
+    const launched = launchMission(session, mission.id, crewIds, { rng: fixedRoll });
+    expect(getTutorialProgress(launched).steps.find((step) => step.id === "launch-mission").complete).toBe(true);
+
+    const completed = advanceDays(launched, mission.duration, { rng: fixedRoll });
+    expect(getTutorialProgress(completed).steps.find((step) => step.id === "complete-mission").complete).toBe(true);
   });
 });

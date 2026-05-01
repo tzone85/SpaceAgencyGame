@@ -541,4 +541,72 @@ export function summarizeSession(session) {
   };
 }
 
+export function getTutorialProgress(session) {
+  const player = session.player;
+  const hasTrainedCrew = player.crew.some((crew) => crew.skillLevel > 99 || crew.experience > 95);
+  const hasExtraCrew = player.crew.length > STARTER_CREW_IDS.length;
+  const leading = summarizeSession(session).rank[0]?.id === player.id;
+
+  const steps = [
+    {
+      id: "read-command",
+      title: "Read Mission Control",
+      tab: "Command",
+      complete: true,
+      body: "Credits launch missions, science unlocks research, reputation pulls in better funding, and score decides the league.",
+    },
+    {
+      id: "launch-mission",
+      title: "Launch a starter mission",
+      tab: "Missions",
+      complete: player.activeMissions.length > 0 || player.completedMissions.length > 0,
+      body: "Open Missions and launch ISS Supply Mission or Communications Satellite Deployment. The game auto-picks ready crew.",
+    },
+    {
+      id: "complete-mission",
+      title: "Bring a mission home",
+      tab: "Command",
+      complete: player.completedMissions.length > 0,
+      body: "Use Advance Day or Fast Week until the mission resolves. Successful missions pay credits, science, rep, and score.",
+    },
+    {
+      id: "start-research",
+      title: "Start a research project",
+      tab: "Research",
+      complete: Boolean(player.activeResearch) || player.completedResearch.length > 0,
+      body: "Research spends science and credits now so later mission tiers open up. Basic Rockets is a strong first pick.",
+    },
+    {
+      id: "upgrade-crew",
+      title: "Improve the crew bench",
+      tab: "Crew",
+      complete: hasTrainedCrew || hasExtraCrew,
+      body: "Train a ready crew member for better odds, or recruit a specialist when credits are healthy.",
+    },
+    {
+      id: "learn-network",
+      title: "Host or join same-WiFi play",
+      tab: "Network",
+      complete: session.mode === "lan" || session.onlinePlayers.length > 0,
+      body: "Run npm run host on the PC, open the LAN URL on phones, then create or join a room code.",
+    },
+    {
+      id: "take-lead",
+      title: "Take first place",
+      tab: "Command",
+      complete: leading,
+      body: "Chain missions and research to pass the rival agencies on the league table.",
+    },
+  ];
+
+  const completed = steps.filter((step) => step.complete).length;
+  return {
+    completed,
+    total: steps.length,
+    percent: Math.round((completed / steps.length) * 100),
+    nextStep: steps.find((step) => !step.complete) || null,
+    steps,
+  };
+}
+
 export { SAVE_VERSION };

@@ -1,4 +1,4 @@
-const CACHE_NAME = "stellar-command-v2";
+const CACHE_NAME = "stellar-command-v3";
 const APP_SHELL = [
   "/",
   "/index.html",

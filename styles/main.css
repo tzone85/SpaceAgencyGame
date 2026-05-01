@@ -1429,7 +1429,7 @@ input {
 
 .sc-tabs {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 8px;
   padding: 10px;
 }
@@ -1461,6 +1461,79 @@ input {
 
 .sc-feed {
   grid-column: 1 / -1;
+}
+
+.sc-coach {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+  border-color: rgba(70, 230, 176, 0.5);
+}
+
+.sc-coach p {
+  margin: 8px 0 0;
+}
+
+.sc-academy {
+  display: grid;
+  gap: 14px;
+}
+
+.sc-academy__hero {
+  display: grid;
+  gap: 12px;
+}
+
+.sc-academy__hero p {
+  max-width: 78ch;
+  margin: 0;
+}
+
+.sc-lessons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.sc-lesson {
+  display: flex;
+  min-height: 230px;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--sc-line);
+  border-radius: var(--sc-radius);
+  background: var(--sc-panel-strong);
+}
+
+.sc-lesson.is-complete {
+  border-color: rgba(70, 230, 176, 0.6);
+  background: linear-gradient(135deg, rgba(70, 230, 176, 0.14), rgba(17, 34, 64, 0.96));
+}
+
+.sc-lesson span {
+  width: max-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  color: #101828;
+  background: var(--sc-mint);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.sc-lesson h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.sc-lesson p {
+  margin: 0;
+}
+
+.sc-lesson .sc-button {
+  margin-top: auto;
 }
 
 .sc-board,
@@ -1642,6 +1715,11 @@ input {
 
   .sc-command {
     grid-template-columns: 1fr;
+  }
+
+  .sc-coach {
+    align-items: stretch;
+    flex-direction: column;
   }
 }
 
