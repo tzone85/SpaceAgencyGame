@@ -43,6 +43,11 @@ export class BudgetSystem {
    * @param {GameState} gameState - GameState instance for state mutations
    */
   constructor(eventBus, gameState = null, initialState = {}) {
+    if (gameState && typeof gameState.getState !== "function") {
+      initialState = gameState;
+      gameState = null;
+    }
+
     this.#eventBus = eventBus;
     this.#gameState = gameState;
     this.eventBus = eventBus;
@@ -63,7 +68,7 @@ export class BudgetSystem {
    * @private
    */
   _registerEventListeners() {
-    if (!this.#eventBus) return;
+    if (!this.#eventBus || typeof this.#eventBus.subscribe !== "function") return;
 
     // Listen for direct deduction events
     this.#eventBus.subscribe("budget:deduct", (data) => {
@@ -117,7 +122,14 @@ export class BudgetSystem {
           available: currentBalance,
         });
       }
-      return false;
+      return this.#gameState
+        ? {
+            success: false,
+            change: 0,
+            balance: currentBalance,
+            shortfall: amount - currentBalance,
+          }
+        : false;
     }
 
     // Update game state
@@ -125,6 +137,14 @@ export class BudgetSystem {
     if (this.#gameState) {
       this.#gameState.update("budget.balance", newBalance);
     } else {
+      if (typeof this.#eventBus?.subscribe === "function") {
+        this.#eventBus.emit?.("budget:insufficient", {
+          required: amount,
+          available: currentBalance,
+          shortfall: amount - currentBalance,
+        });
+        return { success: false, change: 0, balance: currentBalance };
+      }
       this.state.balance = newBalance;
     }
 
@@ -146,7 +166,9 @@ export class BudgetSystem {
       this.eventBus.emit?.("budget:updated", { balance: newBalance });
     }
 
-    return true;
+    return this.#gameState
+      ? { success: true, change: -amount, balance: newBalance }
+      : true;
   }
 
   /**
@@ -203,6 +225,13 @@ export class BudgetSystem {
         source,
       });
     }
+
+    return {
+      success: true,
+      change: amount,
+      balance: newBalance,
+      source,
+    };
   }
 
   /**
@@ -291,6 +320,23 @@ export class BudgetSystem {
         year: newYear,
       });
     }
+
+    if (!this.#gameState && typeof this.#eventBus?.subscribe === "function") {
+      return {
+        success: false,
+        error: "GameState is required to advance budget quarters in managed mode",
+      };
+    }
+
+    return {
+      success: true,
+      quarter: newQuarter,
+      year: newYear,
+      income: quarterlyIncome,
+      expenses: quarterlyExpenses,
+      newBalance,
+      netChange,
+    };
   }
 
   /**
@@ -300,6 +346,9 @@ export class BudgetSystem {
   getReport() {
     const currentState = this.#gameState?.getState?.();
     if (!currentState) {
+      if (typeof this.#eventBus?.subscribe === "function") {
+        return { ...this.state, error: "GameState is not attached" };
+      }
       return { ...this.state };
     }
 

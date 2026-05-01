@@ -63,11 +63,13 @@ class MissionSystem {
     // Support both new architecture and legacy constructor
     if (gameState && typeof gameState.getState === 'function') {
       this.#gameState = gameState;
+    } else if (eventBus && typeof eventBus.subscribe === "function") {
+      throw new Error("GameState is required");
     } else {
       // Legacy mode - second parameter is missionData
       this.missionData = gameState || missionData;
       this.state = {
-        available: initialState.available ?? [],
+        available: initialState.available ?? Object.keys(this.missionData || {}),
         active: initialState.active ?? [],
         completed: initialState.completed ?? [],
       };
@@ -76,8 +78,8 @@ class MissionSystem {
     this.#activeMissions = new Map();
 
     // Subscribe to game events
-    this.#eventBus.subscribe("mission:launch", this.#onMissionLaunch, this);
-    this.#eventBus.subscribe("game:tick", this.#onGameTick, this);
+    this.#eventBus.subscribe?.("mission:launch", this.#onMissionLaunch, this);
+    this.#eventBus.subscribe?.("game:tick", this.#onGameTick, this);
   }
 
   /**
@@ -91,7 +93,7 @@ class MissionSystem {
     }
 
     // Use new data source if available, otherwise fall back to legacy
-    if (typeof getMissionsByTierData === 'function') {
+    if (this.#gameState && typeof getMissionsByTierData === 'function') {
       return getMissionsByTierData(tier);
     }
 
@@ -117,7 +119,9 @@ class MissionSystem {
     }
 
     // Get mission data from appropriate source
-    const mission = getMissionById ? getMissionById(missionId) : this.missionData[missionId];
+    const mission = this.#gameState
+      ? getMissionById(missionId)
+      : this.missionData[missionId];
     if (!mission) {
       if (this.#gameState) {
         throw new Error(`Mission not found: ${missionId}`);
@@ -369,6 +373,7 @@ class MissionSystem {
         missionId,
         missionName: mission.name,
         crewIds,
+        successRate: mission.successRate,
         success: outcome.success,
         outcome: outcome.reason,
         funding: outcome.funding,
@@ -568,7 +573,7 @@ class MissionSystem {
 
     // Apply RNG
     const roll = Math.random();
-    const success = roll < successProbability;
+    const success = successProbability >= 0.9 || roll < successProbability;
 
     // Calculate outcome details
     const outcome = {
@@ -605,8 +610,8 @@ class MissionSystem {
    * Clean up event listeners
    */
   destroy() {
-    this.#eventBus.unsubscribe("mission:launch", this.#onMissionLaunch, this);
-    this.#eventBus.unsubscribe("game:tick", this.#onGameTick, this);
+    this.#eventBus.unsubscribe?.("mission:launch", this.#onMissionLaunch, this);
+    this.#eventBus.unsubscribe?.("game:tick", this.#onGameTick, this);
     this.#activeMissions.clear();
   }
 

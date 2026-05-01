@@ -259,23 +259,32 @@ class Starfield {
       const trailY = star.y - star.vy * (star.length / star.vy);
 
       // Draw gradient line for shooting star trail
-      const gradient = this.context.createLinearGradient(
-        trailX,
-        trailY,
-        star.x,
-        star.y,
-      );
-      gradient.addColorStop(0, `rgba(255, 255, 200, 0)`);
-      gradient.addColorStop(0.5, `rgba(255, 255, 200, ${opacity * 0.7})`);
-      gradient.addColorStop(1, `rgba(255, 255, 255, ${opacity})`);
-
-      this.context.strokeStyle = gradient;
-      this.context.lineWidth = star.width;
-      this.context.lineCap = "round";
-      this.context.beginPath();
-      this.context.moveTo(trailX, trailY);
-      this.context.lineTo(star.x, star.y);
-      this.context.stroke();
+      if (typeof this.context.createLinearGradient === "function") {
+        const gradient = this.context.createLinearGradient(
+          trailX,
+          trailY,
+          star.x,
+          star.y,
+        );
+        gradient.addColorStop(0, `rgba(255, 255, 200, 0)`);
+        gradient.addColorStop(0.5, `rgba(255, 255, 200, ${opacity * 0.7})`);
+        gradient.addColorStop(1, `rgba(255, 255, 255, ${opacity})`);
+        this.context.strokeStyle = gradient;
+      } else {
+        this.context.strokeStyle = `rgba(255, 255, 255, ${opacity})`;
+      }
+      if (
+        typeof this.context.moveTo === "function" &&
+        typeof this.context.lineTo === "function" &&
+        typeof this.context.stroke === "function"
+      ) {
+        this.context.lineWidth = star.width;
+        this.context.lineCap = "round";
+        this.context.beginPath();
+        this.context.moveTo(trailX, trailY);
+        this.context.lineTo(star.x, star.y);
+        this.context.stroke();
+      }
 
       // Draw bright core of shooting star
       this.context.fillStyle = `rgba(255, 255, 255, ${opacity})`;

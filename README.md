@@ -1,6 +1,6 @@
 # Stellar Command
 
-A browser-based space agency management game where players control a space agency, plan missions, manage resources, and explore the cosmos.
+A responsive browser space-agency strategy game. Play solo against rival AI agencies, install it as a PWA, or host a same-WiFi LAN room from a PC so phones and laptops can join.
 
 ## Game Concept
 
@@ -8,12 +8,11 @@ Stellar Command puts you in the role of a space agency director. Build and expan
 
 ### Key Features
 
-- **Space Agency Management**: Build and manage your space agency from the ground up
-- **Mission Planning**: Design and execute complex space missions with multiple objectives
-- **Resource Management**: Manage budgets, personnel, and research programs
-- **Technology Research**: Develop new technologies to improve spacecraft and mission capabilities
-- **Exploration**: Discover new celestial bodies and conduct scientific research
-- **Strategic Gameplay**: Make meaningful decisions that affect your agency's future
+- **Playable agency loop**: launch missions, earn credits and science, unlock research, train and recruit crew.
+- **Solo rival AI**: three computer agencies launch and complete missions while you race the league table.
+- **Same-WiFi multiplayer**: run the LAN host on one PC and join from phones or laptops on the same network.
+- **PWA-ready**: standalone display manifest, service worker app shell, responsive touch-friendly UI.
+- **Modern browser game feel**: mobile-first controls, live signal feed, mission cards, crew cards, and league table.
 
 ## Project Structure
 
@@ -49,8 +48,8 @@ stellar-command/
 
 ### Prerequisites
 
-- Node.js (v14 or higher)
-- npm (v6 or higher)
+- Node.js 18 or higher
+- npm 9 or higher
 
 ### Installation
 
@@ -64,7 +63,15 @@ npm install
 npm run dev
 ```
 
-This will start the development server with hot reloading at `http://localhost:8080`.
+This starts the development server at `http://localhost:3000`.
+
+### Same-WiFi Play
+
+```bash
+npm run host
+```
+
+The host command builds the game, starts a static server with a WebSocket room endpoint, and prints a LAN URL such as `http://192.168.x.x:4174`. Open that URL on phones or other PCs connected to the same WiFi, then use the Network tab to create or join a room code.
 
 ### Build
 
@@ -81,6 +88,18 @@ npm test
 ```
 
 Run the test suite to verify all components are working correctly.
+
+Focused revamp tests can be run without global coverage thresholds:
+
+```bash
+npm test -- tests/domain/stellar-command-session.test.js tests/net/multiplayerProtocol.test.js --runInBand --coverage=false
+```
+
+## Deployment
+
+- **Best public game page**: itch.io. Upload a ZIP of `dist/` for a free HTML5 game page.
+- **Best git-backed static deployment**: Vercel or Cloudflare Pages. Build command is `npm run build`; output directory is `dist`.
+- **LAN multiplayer**: use `npm run host`; static hosts generally will not run the local WebSocket room server.
 
 ## Architecture
 
